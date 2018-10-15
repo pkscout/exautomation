@@ -1,10 +1,9 @@
-# adm_auto
+# exautomation
 Python command line tool to automate various file exchanges
 
 
 PREREQUISITES:
 Python 3.x (tested with Python 3.7, might work with Python 2.x, but I doubt it)
-pysftp module (pip3 install pysftp)
 requests module (pip3 install requests)
 chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)*
 *The chilkat module is only required if using any source/destination module requiring FTP over SSL or SSH (currently commonapp and fireworks)
