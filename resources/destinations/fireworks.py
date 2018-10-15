@@ -16,7 +16,7 @@ class Destination:
     def Send( self, files ):
         loglines = []
         ftps = chilkat.CkFtp2()
-        success = sftp.UnlockComponent( self.CHILKATLICENSE )
+        success = ftps.UnlockComponent( self.CHILKATLICENSE )
         if (success != True):
             loglines.append( ftps.lastErrorText() )
             return False, loglines
