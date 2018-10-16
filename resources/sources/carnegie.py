@@ -8,6 +8,7 @@ class cparser( HTMLParser ):
         self.EXTRACTING = False
         self.TESTLINK = ''
         self.LATESTLINK = ''
+        self.FILEDATE = filedate
         
         
     def handle_starttag(self, tag, attrs):
@@ -22,7 +23,7 @@ class cparser( HTMLParser ):
 
     def handle_data( self, data ):
         if self.EXTRACTING:
-            name = 'PCU-%s.csv' % filedate
+            name = 'PCU-%s.csv' % self.FILEDATE
             if data == name:
                 self.LATESTLINK = self.TESTLINK
 
@@ -59,7 +60,7 @@ class Source:
             if parser.LATESTLINK:
                 loglines.append( 'getting ' + parser.LATESTLINK )
                 destfile = 'PCU-%s.csv' % self.FILEDATE
-                dest = os.path.join( self.DATAROOT, destfile)
+                dest = os.path.join( self.DATAROOT, 'downloads', destfile)
                 rURL = self.BASEURL + parser.LATESTLINK + '?send=True'
                 r = s.get( rURL, stream=True )
                 if r.status_code == 200:
