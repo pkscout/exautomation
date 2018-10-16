@@ -2,13 +2,12 @@ from html.parser import HTMLParser
 import datetime, os, requests, shutil
 
 class cparser( HTMLParser ):
-    def __init__( self, override_date ):
+    def __init__( self, filedate ):
         super().__init__()
         self.reset()
         self.EXTRACTING = False
         self.TESTLINK = ''
         self.LATESTLINK = ''
-        self.OVERRIDE_DATE = override_date
         
         
     def handle_starttag(self, tag, attrs):
@@ -23,10 +22,6 @@ class cparser( HTMLParser ):
 
     def handle_data( self, data ):
         if self.EXTRACTING:
-            if self.OVERRIDE_DATE:
-                filedate = self.OVERRIDE_DATE
-            else:
-                filedate = str( datetime.date.today() )
             name = 'PCU-%s.csv' % filedate
             if data == name:
                 self.LATESTLINK = self.TESTLINK
@@ -59,11 +54,11 @@ class Source:
         with requests.Session() as s:
             loglines.append( 'attempting to get file from Carnegie server' )
             p = s.post( self.CONNURL, data = self.PAYLOAD )
-            parser = cparser( self.OVERRIDE_DATE )
+            parser = cparser( self.FILEDATE )
             parser.feed( p.text )
             if parser.LATESTLINK:
                 loglines.append( 'getting ' + parser.LATESTLINK )
-                destfile = 'PCU-%s.csv' % str( datetime.date.today() )
+                destfile = 'PCU-%s.csv' % self.FILEDATE
                 dest = os.path.join( self.DATAROOT, destfile)
                 rURL = self.BASEURL + parser.LATESTLINK + '?send=True'
                 r = s.get( rURL, stream=True )
