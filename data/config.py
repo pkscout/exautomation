@@ -1,6 +1,6 @@
 defaults = { 'aborttime': 300,
              'logbackups': 7,
-             'timezone': '-1000',
+             'gmtoffset': '',
              'download_max': 0,
              'chilkat_license': 'Anything for 30-day trial',
              'debug': False,

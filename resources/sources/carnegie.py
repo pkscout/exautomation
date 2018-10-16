@@ -48,7 +48,7 @@ class Source:
         self.CONNURL =  self.BASEURL + config.Get( 'carnegie_path' )
         self.DEBUG = config.Get( 'debug' )
         if override_date:
-            filedate = datetime.strptime( override_date, '%Y-%m-%d' ).date()
+            filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
         else:
             filedate = datetime.date.today() - datetime.timedelta(1)
         self.FILEDATE = filedate.strftime( config.Get( 'carnegie_dateformat' ) )
