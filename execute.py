@@ -99,7 +99,6 @@ class Main:
         download_max = config.Get( 'download_max' )
         if download_max:
             download_path = os.path.join( self.DATAROOT, 'downloads')
-            download_max = download_max*1024000
             download_max = download_max*1024*1024
             total_size = 0
             filelist = []
