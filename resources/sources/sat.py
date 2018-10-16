@@ -13,13 +13,16 @@ class Source:
         payload['username'] = config.Get( 'sat_user' )
         payload['password'] = config.Get( 'sat_auth' )
         self.PAYLOAD = json.dumps( payload )
-        if override_date:
-            if override_date != 'all':
-                self.FROMDATE = '%sT00:00:00%s' % (override_date, config.Get( 'timezone' ))
-        else:
-            yesterday = datetime.date.today() - datetime.timedelta(1)
-            self.FROMDATE = '%sT00:00:00%s' % (yesterday.strftime('%Y-%m-%d'), config.Get( 'timezone' ))
         self.DEBUG = config.Get( 'debug' )
+        if override_date:
+            if override_date == 'all':
+                self.FROMDATE = None
+                return
+            else:
+                fromdate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+        else:
+            fromdate = datetime.date.today() - datetime.timedelta(1)
+        self.FROMDATE = fromdate.strftime( config.Get( 'sat_dateformat' ) + config.Get( 'gmtoffset' ) )
 
     
     def Retrieve( self ):
@@ -28,7 +31,9 @@ class Source:
         dlist = []
         if self.FROMDATE:
             url_params['fromDate'] = self.FROMDATE
-        loglines.append( 'getting SAT files newer than ' + self.FROMDATE )
+            loglines.append( 'getting SAT files newer than ' + self.FROMDATE )
+        else:
+            loglines.append( 'getting all SAT files' )        
         success, uloglines, json_data = self.JSONURL.Post( self.LISTURL, params=url_params, data=self.PAYLOAD )
         if self.DEBUG:
             loglines.extend( uloglines )
@@ -59,7 +64,7 @@ class Source:
                     if self.DEBUG:
                         loglines.extend( uloglines )
                     loglines.append( 'saving file ' + file['fileName'] )
-                    success, wloglines = writeFile( urldata, os.path.join( self.DATAROOT, file['fileName'] ), 'w' )
+                    success, wloglines = writeFile( urldata, os.path.join( self.DATAROOT, 'downloads', file['fileName'] ), 'w' )
                     if self.DEBUG:
                         loglines.extend( wloglines )
                     dlist.append( file['fileName'] )
