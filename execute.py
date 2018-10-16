@@ -1,19 +1,20 @@
 # *  Credits:
 # *
-# *  v.0.1.0
-# *  original adm_auto code by Kyle Johnson
+# *  v.0.3.0
+# *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, importlib, os, random, subprocess, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
-from resources.common.fileops import writeFile, deleteFile
+from resources.common.fileops import writeFile, deleteFile, checkPath
 if sys.version_info < (3, 0):
     from ConfigParser import *
 else:
     from configparser import *
 
 p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
-lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logfile.log' ),
+checkPath( os.path.join( p_folderpath, 'data', 'logs', '' ) )
+lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
              numbackups = config.Get( 'logbackups' ), logdebug = str( config.Get( 'debug' ) ) )
 
 def _deletePID():
@@ -32,6 +33,7 @@ class Main:
         if not success:
             lw.log( ['required modules could not be loaded, exiting'], 'info' )
             return
+        self._trim_downloads()
         rfiles, loglines = self.SOURCE.Retrieve() 
         lw.log( loglines, 'info' )       
         if not rfiles:
@@ -49,8 +51,13 @@ class Main:
         else:
             lw.log( ['files failed to transfer to destination %s, exiting'  % self.ARGS.destination], 'info' )        
 
-            
+
     def _init_vars( self ):
+        self.DATAROOT = os.path.join( p_folderpath, 'data' )
+        thedirs = ['keys', 'downloads']
+        for onedir in thedirs:
+            exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir, '' ) )
+            lw.log( loglines )
         try:
             sourcemodule = importlib.import_module( "resources.sources." + self.ARGS.source )
         except ImportError as e:
@@ -63,9 +70,8 @@ class Main:
             lw.log( ['module for destination %s could not be loaded' % self.ARGS.destination, e], 'info' )
         if (not sourcemodule) or (not destmodule):
             return False
-        dataroot = os.path.join( p_folderpath, 'data' )
-        self.SOURCE = sourcemodule.Source( dataroot, config, self.ARGS.date )
-        self.DESTINATION = destmodule.Destination( dataroot, config, self.ARGS.source )
+        self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
+        self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
         return True
         
 
@@ -87,6 +93,34 @@ class Main:
         lw.log( ['setting PID file'] )
         success, loglines = writeFile( pid, pidfile, wtype='w' )
         lw.log( loglines )        
+
+
+    def _trim_downloads( self ):
+        download_max = config.Get( 'download_max' )
+        if download_max:
+            download_path = os.path.join( self.DATAROOT, 'downloads')
+            download_max = download_max*1024000
+            total_size = 0
+            filelist = []
+            for dirpath, dirnames, filenames in os.walk( download_path ):
+                for file in filenames:
+                    filepath = os.path.join( dirpath, file )
+                    filelist.append( filepath )
+                    total_size += os.path.getsize( filepath )
+            if total_size > download_max:
+                lw.log( ['trimming the download folder down to %s bytes' % download_max], 'info'  )
+                try:
+                    filelist.sort( key=lambda x: os.path.getmtime( x ) )
+                except Exception as e:
+                    lw.log( ['unexpected error sorting download directory', e], 'info' )
+                    return
+                for file in filelist:
+                    if( total_size > download_max ):
+                        total_size = total_size - os.path.getsize( file )
+                        success, dloglines = deleteFile( file )
+                        lw.log( dloglines, 'info' )
+                    else:
+                        break
 
 
 

@@ -1,57 +1,48 @@
 import chilkat, csv, os, ssl
+from ..common.remotesites import ConnectFTPS
 
 class Destination:
     def __init__( self, dataroot, config, source ):
         self.DATAROOT = dataroot
-        self.CHILKATLICENSE = config.Get( 'chilkat_license' )
-        self.SOURCE = source
+        self.CONFIG = {}
+        self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
+        self.CONFIG['module_name'] = 'Fireworks FTPS'
+        self.CONFIG['host'] = config.Get( 'fireworks_baseURL' )
+        self.CONFIG['port'] = config.Get( 'fireworks_port' )
+        self.CONFIG['username'] = config.Get( 'fireworks_user' )
+        self.CONFIG['auth'] = config.Get( 'fireworks_auth' )
+        self.CONFIG['ftps_passive'] = True
+        self.CONFIG['ftps_authtls'] = False
+        self.CONFIG['ftps_ssl'] = True
+        self.CONFIG['debug'] = config.Get( 'debug' )
         self.DESTPATH = config.Get( '%s_fireworks_path' % source )
-        self.HOST = config.Get( 'fireworks_baseURL' )
-        self.PORT = config.Get( 'fireworks_port' )
-        self.USERNAME = config.Get( 'fireworks_user' )
-        self.AUTH = config.Get( 'fireworks_auth' )
+        self.SOURCE = source
         self.DEBUG = config.Get( 'debug' )
 
 
     def Send( self, files ):
         loglines = []
-        ftps = chilkat.CkFtp2()
-        success = sftp.UnlockComponent( self.CHILKATLICENSE )
-        if (success != True):
-            loglines.append( ftps.lastErrorText() )
+        ftps, cloglines = ConnectFTPS( self.CONFIG )
+        loglines.extend( cloglines )
+        if not ftps:
             return False, loglines
-        loglines.append( 'connecting to Fireworks FTPS server' )
-        ftps.put_Passive(True)
-        ftps.put_Hostname( self.HOST )
-        ftps.put_Username( self.USERNAME )
-        ftps.put_Password( self.AUTH )
-        ftps.put_Port( self.PORT )
-        ftps.put_AuthTls( False )
-        ftps.put_Ssl( True )
-        success = ftps.Connect()
-        if (success != True):
-            loglines.append( ftps.lastErrorText() )
-            return False, loglines
-        elif self.DEBUG:
-            loglines.extend( [ftps.lastErrorText(), 'ftps channel established!'] )
         success = ftps.ChangeRemoteDir( self.DESTPATH )
         if (success != True):
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         loglines.append( 'setting destination directory to ' + self.DESTPATH )
         loglines.append( 'transferring files to Fireworks FTPS server' )
+        fsuccess = True
         for file in files:        
             loglines.append( 'transferring file ' + file )
-            filepath = os.path.join( self.DATAROOT, file )
+            filepath = os.path.join( self.DATAROOT, 'downloads', file )
             success = ftps.PutFile( filepath, file )
             if (success != True):
                 loglines.append( ftps.lastErrorText() )
-            else:
-                loglines.append( 'deleting ' + filepath )
-                os.remove( filepath )
+                fsuccess = False
         loglines.append( 'disconnecting from Fireworks FTPS server' )
         success = ftps.Disconnect()
-        return True, loglines
+        return fsuccess, loglines
 
 
     def Transform( self, files ):
@@ -59,9 +50,9 @@ class Destination:
         tfiles = []
         if self.SOURCE == "carnegie":
             for file in files:
-                orgfile = os.path.join( self.DATAROOT, file )
+                orgfile = os.path.join( self.DATAROOT, 'downloads', file )
                 destfilename = '%s-converted%s' % os.path.splitext( file )
-                destfile = os.path.join( self.DATAROOT, destfilename )
+                destfile = os.path.join( self.DATAROOT, 'downloads', destfilename )
                 loglines.append( 'attempting to convert file' )
                 loglines.append( 'opening %s' % orgfile )
                 with open( orgfile,"r" ) as source:
@@ -73,8 +64,6 @@ class Destination:
                             del r[-1]
                             wtr.writerow( r )
                 loglines.append( 'writing to ' + destfile )
-                loglines.append( 'deleting ' + orgfile )
-                os.remove( orgfile )
                 loglines.append( 'conversion complete' )
                 tfiles.append( destfilename )
             return tfiles, loglines

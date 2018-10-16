@@ -1,30 +1,23 @@
-import chilkat, datetime, os
-from ..common.hostkeys import CheckHostKey
+import datetime, os
+from ..common.remotesites import ConnectSFTP
 
 class Source:
     def __init__( self, dataroot, config, override_date ):
         self.DATAROOT = dataroot
-        self.CHILKATLICENSE = config.Get( 'chilkat_license' )
-        self.HOSTKEY = os.path.join( dataroot, 'commonapp_hostkey' )
-        self.HOST = config.Get( 'commonapp_baseURL' )
-        self.USERNAME = config.Get( 'commonapp_user' )
-        self.AUTH = config.Get( 'commonapp_auth' )
-        self.PORT = config.Get( 'commonapp_port' )
-        self.TIMEOUT = config.Get( 'commonapp_timeout' )
+        self.CONFIG = {}
+        self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
+        self.CONFIG['module_name'] = 'Common App SFTP'
+        self.CONFIG['hostkey'] = os.path.join( dataroot, 'keys', 'commonapp_host.key' )
+        self.CONFIG['host'] = config.Get( 'commonapp_baseURL' )
+        self.CONFIG['privatekeypath'] = os.path.join( dataroot, 'keys', 'commonapp_private.key' )
+        self.CONFIG['key_auth'] = config.Get( 'commonapp_key_auth' )
+        self.CONFIG['username'] = config.Get( 'commonapp_user' )
+        self.CONFIG['auth'] = config.Get( 'commonapp_auth' )
+        self.CONFIG['port'] = config.Get( 'commonapp_port' )
+        self.CONFIG['timeout'] = config.Get( 'commonapp_timeout' )
+        self.CONFIG['debug'] = config.Get( 'debug' )     
+        self.DEBUG = config.Get( 'debug' )
         self.PATH = config.Get( 'commonapp_path' )
-        key = chilkat.CkSshKey()
-        key_auth = config.Get( 'commonapp_key_auth' )
-        privatekey = key.loadText( os.path.join( dataroot, config.Get( 'commonapp_key' ) ) )
-        if key.get_LastMethodSuccess() == True:
-            if key_auth:
-                key.put_Password( key_auth );
-            success = key.FromOpenSshPrivateKey( privatekey )
-            if (success == True):
-                self.KEY = key
-            else:
-                self.KEY = None   
-        else:
-            self.KEY = None
         if override_date:
             self.STRTODAY = override_date
         else:
@@ -35,42 +28,9 @@ class Source:
     def Retrieve( self ):
         loglines = []
         dlist = []
-        loglines.append( 'connecting to Common App server' )
-        sftp = chilkat.CkSFtp()
-        success = sftp.UnlockComponent( self.CHILKATLICENSE )
-        if (success != True):
-            loglines.append( sftp.lastErrorText() )
-            return False, loglines
-        sftp.put_ConnectTimeoutMs( self.TIMEOUT )
-        sftp.put_IdleTimeoutMs( self.TIMEOUT )
-        success = sftp.Connect( self.HOST, self.PORT )
-        if (success != True):
-            loglines.append( sftp.lastErrorText() )
-            return False, loglines
-        success, cloglines = CheckHostKey( sftp.hostKeyFingerprint(), self.HOSTKEY )
-        if self.DEBUG:
-            loglines.extend( cloglines )
-        if not success:
-            loglines.append( 'WARNING: HOSTKEY FOR COMMONAPP SERVER DOES NOT MATCH SAVED KEY. ABORTING.' )
-            return False, loglines
-        if self.KEY:
-            loglines.append( 'trying to authentication using private key' )
-            success = sftp.AuthenticatePk( self.USERNAME, self.KEY )
-        else:
-            success = False
-        if (success != True):
-            if self.KEY and self.DEBUG:
-                loglines.append( sftp.lastErrorText() )
-            elif self.KEY:
-                loglines.append( 'private key based authentication failed' )
-            loglines.append( 'trying to authentication with username and password' )
-            success = sftp.AuthenticatePw( self.USERNAME, self.AUTH )
-            if (success != True):
-                loglines.append( sftp.lastErrorText() )
-                return False, loglines
-        success = sftp.InitializeSftp()
-        if (success != True):
-            loglines.append( sftp.lastErrorText() )
+        sftp, cloglines = ConnectSFTP( self.CONFIG )
+        loglines.extend( cloglines )
+        if not sftp:
             return False, loglines
         handle = sftp.openDir( self.PATH )
         if (sftp.get_LastMethodSuccess() != True):
@@ -91,8 +51,8 @@ class Source:
                 remotefile = remotepath + filename
                 if self.DEBUG:
                     loglines.append( 'checking file ' + filename )
-                if self.STRTODAY in filename:
-                    localfile = os.path.join( self.DATAROOT, filename )
+                if (self.STRTODAY in filename) and not ('.zip' in filename):
+                    localfile = os.path.join( self.DATAROOT, 'downloads', filename )
                     success = sftp.DownloadFileByName( remotefile, localfile )
                     if success == True:
                         loglines.append( 'downloaded %s to %s' % (remotefile, localfile) )
