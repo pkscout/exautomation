@@ -42,11 +42,16 @@ class cparser( HTMLParser ):
 class Source:
     def __init__( self, dataroot, config, override_date ):
         self.DATAROOT = dataroot
-        self.OVERRIDE_DATE = override_date
         self.PAYLOAD = { 'email': config.Get( 'carnegie_user' ),
                     'password': config.Get( 'carnegie_auth' ) }
         self.BASEURL = config.Get( 'carnegie_baseURL' )
         self.CONNURL =  self.BASEURL + config.Get( 'carnegie_path' )
+        self.DEBUG = config.Get( 'debug' )
+        if override_date:
+            filedate = datetime.strptime( override_date, '%Y-%m-%d' ).date()
+        else:
+            filedate = datetime.date.today() - datetime.timedelta(1)
+        self.FILEDATE = filedate.strftime( config.Get( 'carnegie_dateformat' ) )
 
         
     def Retrieve( self ):
