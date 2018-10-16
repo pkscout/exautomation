@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.0.3.0
+# *  v.0.4.0
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, importlib, os, random, subprocess, sys, time
@@ -14,8 +14,8 @@ else:
 
 p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
 checkPath( os.path.join( p_folderpath, 'data', 'logs', '' ) )
-lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
-             numbackups = config.Get( 'logbackups' ), logdebug = str( config.Get( 'debug' ) ) )
+lw = Logger( logfile=os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
+             logconfig='timed', numbackups=config.Get( 'logbackups' ), logdebug=str( config.Get( 'debug' ) ) )
 
 def _deletePID():
     success, loglines = deleteFile( pidfile )
@@ -100,6 +100,7 @@ class Main:
         if download_max:
             download_path = os.path.join( self.DATAROOT, 'downloads')
             download_max = download_max*1024000
+            download_max = download_max*1024*1024
             total_size = 0
             filelist = []
             for dirpath, dirnames, filenames in os.walk( download_path ):
