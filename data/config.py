@@ -1,6 +1,7 @@
 defaults = { 'aborttime': 300,
              'logbackups': 7,
              'gmtoffset': '',
+             'override_dateformat': '%Y-%m-%d',
              'download_max': 0,
              'chilkat_license': 'Anything for 30-day trial',
              'debug': False,
