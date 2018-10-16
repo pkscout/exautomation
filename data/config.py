@@ -1,6 +1,7 @@
 defaults = { 'aborttime': 300,
              'logbackups': 5,
              'timezone': '-1000',
+             'download_max': 100,
              'chilkat_license': 'Anything for 30-day trial',
              'debug': False,
              'carnegie_user': '',
