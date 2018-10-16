@@ -1,3 +1,7 @@
+v.0.4.0
+- disabled download cache management by default
+- changed logs to daily roll and keep 7 by default
+
 v.0.3.0
 - added cache management for download folder
 
