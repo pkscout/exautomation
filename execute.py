@@ -13,7 +13,7 @@ else:
     from configparser import *
 
 p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
-lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logfile.log' ),
+lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
              numbackups = config.Get( 'logbackups' ), logdebug = str( config.Get( 'debug' ) ) )
 
 def _deletePID():

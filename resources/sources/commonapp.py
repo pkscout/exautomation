@@ -6,10 +6,10 @@ class Source:
         self.DATAROOT = dataroot
         self.CONFIG = {}
         self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
-        self.CONFIG['module_name'] = 'Common App'
-        self.CONFIG['hostkey'] = os.path.join( dataroot, 'commonapp_hostkey' )
+        self.CONFIG['module_name'] = 'Common App SFTP'
+        self.CONFIG['hostkey'] = os.path.join( dataroot, 'keys', 'commonapp_host.key' )
         self.CONFIG['host'] = config.Get( 'commonapp_baseURL' )
-        self.CONFIG['privatekeypath'] = os.path.join( dataroot, config.Get( 'commonapp_key' ) )
+        self.CONFIG['privatekeypath'] = os.path.join( dataroot, 'keys', 'commonapp_private.key' )
         self.CONFIG['key_auth'] = config.Get( 'commonapp_key_auth' )
         self.CONFIG['username'] = config.Get( 'commonapp_user' )
         self.CONFIG['auth'] = config.Get( 'commonapp_auth' )
@@ -52,7 +52,7 @@ class Source:
                 if self.DEBUG:
                     loglines.append( 'checking file ' + filename )
                 if (self.STRTODAY in filename) and not ('.zip' in filename):
-                    localfile = os.path.join( self.DATAROOT, filename )
+                    localfile = os.path.join( self.DATAROOT, 'downloads', filename )
                     success = sftp.DownloadFileByName( remotefile, localfile )
                     if success == True:
                         loglines.append( 'downloaded %s to %s' % (remotefile, localfile) )
