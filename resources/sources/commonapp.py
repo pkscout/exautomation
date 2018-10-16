@@ -1,4 +1,5 @@
-import datetime, os
+import os, sys
+from datetime import datetime, date, timedelta
 from ..common.remotesites import ConnectSFTP
 
 class Source:
@@ -20,9 +21,13 @@ class Source:
         self.PATH = config.Get( 'commonapp_path' )
         self.DEBUG = config.Get( 'debug' )
         if override_date:
-            filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+            try:
+                filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+            except ValueError as e:
+                print( 'Error: ' + str( e ) )
+                raise ValueError( str( e ) )
         else:
-            filedate = datetime.date.today() - datetime.timedelta(1)
+            filedate = date.today() - timedelta(1)
         self.FILEDATE = filedate.strftime( config.Get( 'commonapp_dateformat' ) )
     
     

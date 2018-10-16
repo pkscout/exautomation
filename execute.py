@@ -70,15 +70,23 @@ class Main:
             lw.log( ['module for destination %s could not be loaded' % self.ARGS.destination, e], 'info' )
         if (not sourcemodule) or (not destmodule):
             return False
-        self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
-        self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
+        try:
+            self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
+        except ValueError as e:
+            lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' ) 
+            return False       
+        try:
+            self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
+        except ValueError as e:
+            lw.log( ['module for destination %s generated an error' % self.ARGS.destination, str( e )], 'info' )
+            return False
         return True
         
 
     def _parse_argv( self ):
         parser = argparse.ArgumentParser()
-        parser.add_argument( "-s", "--source", help="REQUIRED the external source (carnegie, act, sat, commonapp)", required=True )
-        parser.add_argument( "-d", "--destination", help="REQUIRED the external destination (fireworks)", required=True )
+        parser.add_argument( "-s", "--source", help="REQUIRED the external source", required=True )
+        parser.add_argument( "-d", "--destination", help="REQUIRED the external destination", required=True )
         parser.add_argument( "-t", "--date", help="override the default date behavior with a specific date (format yyyy-mm-dd unless overriden in settings.py)" )
         self.ARGS = parser.parse_args()
 

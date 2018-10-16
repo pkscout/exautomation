@@ -1,4 +1,5 @@
-import datetime, json, os, sys
+import json, os, sys
+from datetime import datetime, date, timedelta
 from ..common.url import URL
 from ..common.fileops import writeFile
 
@@ -19,9 +20,13 @@ class Source:
                 self.FROMDATE = None
                 return
             else:
-                fromdate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+                try:
+                    filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+                except ValueError as e:
+                    print( 'Error: ' + str( e ) )
+                    raise ValueError( str( e ) )
         else:
-            fromdate = datetime.date.today() - datetime.timedelta(1)
+            fromdate = date.today() - timedelta(1)
         self.FROMDATE = fromdate.strftime( config.Get( 'sat_dateformat' ) + config.Get( 'gmtoffset' ) )
 
     
