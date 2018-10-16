@@ -79,7 +79,7 @@ class Main:
         parser = argparse.ArgumentParser()
         parser.add_argument( "-s", "--source", help="REQUIRED the external source (carnegie, act, sat, commonapp)", required=True )
         parser.add_argument( "-d", "--destination", help="REQUIRED the external destination (fireworks)", required=True )
-        parser.add_argument( "-t", "--date", help="override default behavior of now (format will depend on source)" )
+        parser.add_argument( "-t", "--date", help="override the default date behavior with a specific date (format yyyy-mm-dd unless overriden in settings.py)" )
         self.ARGS = parser.parse_args()
 
 
