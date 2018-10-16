@@ -1,4 +1,5 @@
-import datetime, os
+import os, sys
+from datetime import datetime, date, timedelta
 from ..common.remotesites import ConnectSFTP
 
 class Source:
@@ -18,11 +19,16 @@ class Source:
         self.CONFIG['debug'] = config.Get( 'debug' )     
         self.DEBUG = config.Get( 'debug' )
         self.PATH = config.Get( 'commonapp_path' )
-        if override_date:
-            self.STRTODAY = override_date
-        else:
-            self.STRTODAY = datetime.date.today().strftime( config.Get( 'commonapp_dateformat' ) )
         self.DEBUG = config.Get( 'debug' )
+        if override_date:
+            try:
+                filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+            except ValueError as e:
+                print( 'Error: ' + str( e ) )
+                raise ValueError( str( e ) )
+        else:
+            filedate = date.today() - timedelta(1)
+        self.FILEDATE = filedate.strftime( config.Get( 'commonapp_dateformat' ) )
     
     
     def Retrieve( self ):
@@ -51,7 +57,7 @@ class Source:
                 remotefile = remotepath + filename
                 if self.DEBUG:
                     loglines.append( 'checking file ' + filename )
-                if (self.STRTODAY in filename) and not ('.zip' in filename):
+                if (self.FILEDATE in filename) and not ('.zip' in filename):
                     localfile = os.path.join( self.DATAROOT, 'downloads', filename )
                     success = sftp.DownloadFileByName( remotefile, localfile )
                     if success == True:

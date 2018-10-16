@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.0.3.0
+# *  v.0.4.0
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, importlib, os, random, subprocess, sys, time
@@ -14,8 +14,8 @@ else:
 
 p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
 checkPath( os.path.join( p_folderpath, 'data', 'logs', '' ) )
-lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
-             numbackups = config.Get( 'logbackups' ), logdebug = str( config.Get( 'debug' ) ) )
+lw = Logger( logfile=os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
+             logconfig='timed', numbackups=config.Get( 'logbackups' ), logdebug=str( config.Get( 'debug' ) ) )
 
 def _deletePID():
     success, loglines = deleteFile( pidfile )
@@ -70,16 +70,24 @@ class Main:
             lw.log( ['module for destination %s could not be loaded' % self.ARGS.destination, e], 'info' )
         if (not sourcemodule) or (not destmodule):
             return False
-        self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
-        self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
+        try:
+            self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
+        except ValueError as e:
+            lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' ) 
+            return False       
+        try:
+            self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
+        except ValueError as e:
+            lw.log( ['module for destination %s generated an error' % self.ARGS.destination, str( e )], 'info' )
+            return False
         return True
         
 
     def _parse_argv( self ):
         parser = argparse.ArgumentParser()
-        parser.add_argument( "-s", "--source", help="REQUIRED the external source (carnegie, act, sat, commonapp)", required=True )
-        parser.add_argument( "-d", "--destination", help="REQUIRED the external destination (fireworks)", required=True )
-        parser.add_argument( "-t", "--date", help="override default behavior of now (format will depend on source)" )
+        parser.add_argument( "-s", "--source", help="REQUIRED the external source", required=True )
+        parser.add_argument( "-d", "--destination", help="REQUIRED the external destination", required=True )
+        parser.add_argument( "-t", "--date", help="override the default date behavior with a specific date (format yyyy-mm-dd unless overriden in settings.py)" )
         self.ARGS = parser.parse_args()
 
 
@@ -99,7 +107,7 @@ class Main:
         download_max = config.Get( 'download_max' )
         if download_max:
             download_path = os.path.join( self.DATAROOT, 'downloads')
-            download_max = download_max*1024000
+            download_max = download_max*1024*1024
             total_size = 0
             filelist = []
             for dirpath, dirnames, filenames in os.walk( download_path ):
