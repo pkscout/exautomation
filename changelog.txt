@@ -1,2 +1,6 @@
+v.0.2.0
+- changed location of stored files
+- now keep all downloaded files (cache management coming in future version)
+
 v.0.1.0
 - initial coding

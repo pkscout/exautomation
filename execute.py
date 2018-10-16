@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.0.1.0
+# *  v.0.2.0
 # *  original adm_auto code by Kyle Johnson
 
 import atexit, argparse, importlib, os, random, subprocess, sys, time
