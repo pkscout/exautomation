@@ -6,13 +6,14 @@
 import atexit, argparse, importlib, os, random, subprocess, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
-from resources.common.fileops import writeFile, deleteFile
+from resources.common.fileops import writeFile, deleteFile, checkPath
 if sys.version_info < (3, 0):
     from ConfigParser import *
 else:
     from configparser import *
 
 p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
+checkPath( os.path.join( p_folderpath, 'data', 'logs', '' ) )
 lw = Logger( logfile = os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
              numbackups = config.Get( 'logbackups' ), logdebug = str( config.Get( 'debug' ) ) )
 
@@ -51,6 +52,11 @@ class Main:
 
             
     def _init_vars( self ):
+        dataroot = os.path.join( p_folderpath, 'data' )
+        thedirs = ['keys', 'downloads']
+        for onedir in thedirs:
+            exists, loglines = checkPath( os.path.join( dataroot, onedir, '' ) )
+            lw.log( loglines )
         try:
             sourcemodule = importlib.import_module( "resources.sources." + self.ARGS.source )
         except ImportError as e:
@@ -63,7 +69,6 @@ class Main:
             lw.log( ['module for destination %s could not be loaded' % self.ARGS.destination, e], 'info' )
         if (not sourcemodule) or (not destmodule):
             return False
-        dataroot = os.path.join( p_folderpath, 'data' )
         self.SOURCE = sourcemodule.Source( dataroot, config, self.ARGS.date )
         self.DESTINATION = destmodule.Destination( dataroot, config, self.ARGS.source )
         return True
