@@ -5,8 +5,7 @@ Python command line tool to automate various file exchanges
 PREREQUISITES:
 Python 3.x (tested with Python 3.7, might work with Python 2.x, but I doubt it)
 requests module (pip3 install requests)
-chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)*
-*The chilkat module is only required if using any source/destination module requiring FTP over SSL or SSH (currently commonapp and fireworks)
+chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)
 
 
 INSTALLATION:
@@ -14,7 +13,17 @@ To install download and unzip in any directory.
 
 
 CONFIGURATION:
-The script has a set of default settings that you can see in data/config.py.  If you want to make changes you can create a settings.py file put in anything you want to override (using the format setting = value).  You will need to set some things for the script to work (like the authentication information for any source or destination you are using), and unless you're in Hawaii, you almost certainly want to override the GMT offset using the timezone setting.
+The script has a set of default settings that you can see in data/config.py.  If you want to make changes you can create a settings.py file put in anything you want to override (using the format setting = value) or copy the settings-example.py to settings.py and update as needed.
+
+• The commonapp and fireworks modules require a licensed module to work.  Once you purchase it (see URL above) you need to add chilkat_license = <string> where <string> is the license key to the settings.py file.  The script will activate a free 30 day trial the first time you run it.
+
+• all modules require authentication of some sort, so remember to fill out those sections as needed.  You can leave the authentication blank for a given module if you are not using that module.
+
+• By default all downloaded and converted files are saved. To cap the size of the download directory, add download_max = x (where x is megabytes) to the settings.py file.
+
+• By default logs are rolled every day and saved for seven days.  To keep a different number of log files add logbackup = x (where x is number of days) to the settings.py file.
+
+• By default the log stores a minimal amount of information.  If you're having problems, you can enable debug logging by adding debug = True to the settings.py file.  This generates *lots* of information, so it isn't recommended to leave debugging enabled.
 
 
 USAGE:
@@ -22,18 +31,17 @@ usage: execute.py [-h] -s SOURCE -d DESTINATION [-t DATE]
 
 Required arguments:
 -s SOURCE, --source SOURCE
-the source for the file (carnegie, act, sat, commonapp)
+the source for the file
 
 -d DESTINATION, --destination DESTINATION
-the destination for the file (fireworks)
+the destination for the file
 
 Optional arguments:
 -h, --help
 show the help message and exits
   
 -t DATESTRING, --date DATESTRING
-override the default date behavior of now with a specific date. The date format will depend on the source.
-(all current sources use YYYY-MM-DD)
+By default the script gets yesterday's files.  If you override the default date behavior with a specific date (format yyyy-mm-dd) it will get the files for that date.  You can change the date format for the override date by adding override_dateformat = <string> where <string> is a valid date format.
 
 
 WRITING NEW MODULES:

@@ -1,4 +1,5 @@
 v.0.4.0
+- updates for consistent date handling in all modules
 - disabled download cache management by default
 - changed logs to daily roll and keep 7 by default
 
