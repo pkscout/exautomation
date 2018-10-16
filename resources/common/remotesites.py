@@ -54,3 +54,25 @@ def ConnectSFTP( config ):
         loglines.append( sftp.lastErrorText() )
         return False, loglines
     return sftp, loglines
+
+
+def ConnectFTPS( config ):
+    loglines = []
+    ftps = chilkat.CkFtp2()
+    success = ftps.UnlockComponent( config.get( 'chilkat_license', 'Anything for 30 day trial' ) )
+    if (success != True):
+        loglines.append( ftps.lastErrorText() )
+        return False, loglines
+    loglines.append( 'connecting to %s server' % config.get( 'module_name', '' ) )
+    ftps.put_Passive( config.get( 'ftps_passive', False ) )
+    ftps.put_Hostname( config.get( 'host' ) )
+    ftps.put_Username( config.get( 'username' ) )
+    ftps.put_Password( config.get( 'auth' ) )
+    ftps.put_Port( config.get( 'port', 990 ) )
+    ftps.put_AuthTls( config.get( 'ftps_authtls', True ) )
+    ftps.put_Ssl( config.get( 'ftps_ssl', False ) )
+    success = ftps.Connect()
+    if (success != True):
+        loglines.append( ftps.lastErrorText() )
+        return False, loglines
+    return ftps, loglines
