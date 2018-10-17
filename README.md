@@ -1,30 +1,25 @@
 # exautomation
 Python command line tool to automate various file exchanges
 
-**PREREQUISITES:**
+## PREREQUISITES:
 * Python 3.x (tested with Python 3.7, might work with Python 2.x, but I doubt it)
 requests module (pip3 install requests)
 * chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)
 
 
-**INSTALLATION:**
-
+## INSTALLATION:
 To install download and unzip in any directory.
 
 
-**DIRECTORY STRUCTURE:**
-
-*data*
-
+## DIRECTORY STRUCTURE:
+### data
 All configuration data is stored here.  When upgrading the only files in this directory that should be replaced are __init__.py, config.py and settings-example.py.  After the script is run once, it will add three other directories here:  downloads (for all downloaded files), keys (for any private keys you might need plus host keys saved when connecting via SFTP), and logs (for logfiles).
 
-*resources*
-
+### resources
 All shared libraries are stored here.  Unless you are building new modules, you should ever need to be in this directory, but if you do write new modules, they go in either sources or destinations.
 
 
-**CONFIGURATION:**
-
+## CONFIGURATION:
 The script has a set of default settings that you can see in data/config.py.  If you want to make changes you can create a settings.py file put in anything you want to override (using the format setting = value) or copy the settings-example.py to settings.py and update as needed.
 
 * The commonapp and fireworks modules require a separately purchased licensed module to work (see PREREQUISITES).  Once you purchase it you need to add chilkat_license = <string> to the settings.py file where <string> is the license key.  If you don't enter a key, the script will activate a free 30 day trial the first time you run it.
@@ -42,32 +37,24 @@ The script has a set of default settings that you can see in data/config.py.  If
 * If you are using an encrypted key for public/private key pair authentication, you need to add <module>_key_auth = <password> to settings.py where <module> is the name of the module file (minus .py) and <password> is the password for the key.
 
 
-**USAGE:**
-
+## USAGE:
 usage: execute.py [-h] -s SOURCE -d DESTINATION [-t DATE]
 
-Required arguments:
-
+### Required arguments:
 -s SOURCE, --source SOURCE
-
 the source for the file
 
 -d DESTINATION, --destination DESTINATION
-
 the destination for the file
 
-Optional arguments:
-
+### Optional arguments:
 -h, --help
-
 show the help message and exits
   
 -t DATESTRING, --date DATESTRING
-
 By default the script gets yesterday's files.  If you override the default date behavior with a specific date (format yyyy-mm-dd) it will get the files for that date.  You can change the date format for the override date by adding override_dateformat = <string> where <string> is a valid date format.
 
-
-**SCHEDULING TASKS:**
+## SCHEDULING TASKS:
 Obviously an automation tool isn't much use if you can't schedule it.  How you do that is going to be a bit dependent on platform, but generally you will need to call your Python interpreter and then provide the full path to execute.py with valid command line options.  Note that since the script can only do one pair of SOURCE/DESTINATION at a time, you'll need to schedule different jobs for each different pair (or write your own wrapper script to loop through them if you want to).  On Windows you're probably going to use Task Scheduler, and after creating a new task to run daily at a certain time, that might look like:
 
     Program/script: "C:\Program Files\Python 3.7\pythonw.exe"
@@ -78,7 +65,7 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
     15 05 * * * /usr/bin/python3 /home/automation/Scripts/exautomation/execute.py -s sat -f fireworks  > /dev/null 2>&1
 
 
-**WRITING NEW MODULES:**
+## WRITING NEW MODULES:
 
 You can write new source or destination modules and place them in the appropriate subdirectory.  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put in for the SOURCE or DESTINATION on the command line.  You will likely need to add some configuration options, and those should be added to data/config.py in the default section (and can be overriden in settings.py).  The general naming convention for config settings is modulename_configname.  Modules must be of class Source or Destination with the following public functions:
 
