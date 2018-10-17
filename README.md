@@ -41,17 +41,17 @@ The script has a set of default settings that you can see in data/config.py.  If
 usage: execute.py [-h] -s SOURCE -d DESTINATION [-t DATE]
 
 ### Required arguments:
--s SOURCE, --source SOURCE 
+-s SOURCE, --source SOURCE  
 the source for the file
 
--d DESTINATION, --destination DESTINATION 
+-d DESTINATION, --destination DESTINATION  
 the destination for the file
 
 ### Optional arguments:
--h, --help 
+-h, --help  
 show the help message and exits
   
--t DATESTRING, --date DATESTRING 
+-t DATESTRING, --date DATESTRING  
 By default the script gets yesterday's files.  If you override the default date behavior with a specific date (format yyyy-mm-dd) it will get the files for that date.  You can change the date format for the override date by adding override_dateformat = <string> where <string> is a valid date format.
 
 ## SCHEDULING TASKS:
