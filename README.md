@@ -8,18 +8,23 @@ requests module (pip3 install requests)
 
 
 **INSTALLATION:**
+
 To install download and unzip in any directory.
 
 
 **DIRECTORY STRUCTURE:**
+
 *data*
+
 All configuration data is stored here.  When upgrading the only files in this directory that should be replaced are __init__.py, config.py and settings-example.py.  After the script is run once, it will add three other directories here:  downloads (for all downloaded files), keys (for any private keys you might need plus host keys saved when connecting via SFTP), and logs (for logfiles).
 
 *resources*
+
 All shared libraries are stored here.  Unless you are building new modules, you should ever need to be in this directory, but if you do write new modules, they go in either sources or destinations.
 
 
 **CONFIGURATION:**
+
 The script has a set of default settings that you can see in data/config.py.  If you want to make changes you can create a settings.py file put in anything you want to override (using the format setting = value) or copy the settings-example.py to settings.py and update as needed.
 
 * The commonapp and fireworks modules require a separately purchased licensed module to work (see PREREQUISITES).  Once you purchase it you need to add chilkat_license = <string> to the settings.py file where <string> is the license key.  If you don't enter a key, the script will activate a free 30 day trial the first time you run it.
@@ -38,20 +43,27 @@ The script has a set of default settings that you can see in data/config.py.  If
 
 
 **USAGE:**
+
 usage: execute.py [-h] -s SOURCE -d DESTINATION [-t DATE]
 
 Required arguments:
+
 -s SOURCE, --source SOURCE
+
 the source for the file
 
 -d DESTINATION, --destination DESTINATION
+
 the destination for the file
 
 Optional arguments:
+
 -h, --help
+
 show the help message and exits
   
 -t DATESTRING, --date DATESTRING
+
 By default the script gets yesterday's files.  If you override the default date behavior with a specific date (format yyyy-mm-dd) it will get the files for that date.  You can change the date format for the override date by adding override_dateformat = <string> where <string> is a valid date format.
 
 
@@ -67,6 +79,7 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
 
 
 **WRITING NEW MODULES:**
+
 You can write new source or destination modules and place them in the appropriate subdirectory.  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put in for the SOURCE or DESTINATION on the command line.  You will likely need to add some configuration options, and those should be added to data/config.py in the default section (and can be overriden in settings.py).  The general naming convention for config settings is modulename_configname.  Modules must be of class Source or Destination with the following public functions:
 
 
