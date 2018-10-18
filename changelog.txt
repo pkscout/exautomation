@@ -1,3 +1,6 @@
+v.0.5.0
+- abstracted SFTP and FTPS functions to make modules easier to build
+
 v.0.4.0
 - override date more gracefully handled if in incorrect format
 - updates for consistent date handling in all modules

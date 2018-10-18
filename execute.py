@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.0.4.0
+# *  v.0.5.0
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, importlib, os, random, subprocess, sys, time
@@ -34,22 +34,19 @@ class Main:
             lw.log( ['required modules could not be loaded, exiting'], 'info' )
             return
         self._trim_downloads()
+        lw.log( ['attempting to retrieve files for source %s'  % self.ARGS.source], 'info' )
         rfiles, loglines = self.SOURCE.Retrieve() 
         lw.log( loglines, 'info' )       
         if not rfiles:
-            lw.log( ['files could not be retrieved for source %s, exiting'  % self.ARGS.source], 'info' )
             return
+        lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, self.ARGS.destination)], 'info' )
         tfiles, loglines = self.DESTINATION.Transform( rfiles )
         lw.log( loglines, 'info' )
         if not tfiles:
-            lw.log( ['files could not be transformed for source %s, exiting'  % self.ARGS.source], 'info' )
             return
+        lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, self.ARGS.destination)], 'info' )
         success, loglines = self.DESTINATION.Send( tfiles )
         lw.log( loglines, 'info' )
-        if success:
-            lw.log( ['files successfully transfered to destination %s, exiting'  % self.ARGS.destination], 'info' )
-        else:
-            lw.log( ['files failed to transfer to destination %s, exiting'  % self.ARGS.destination], 'info' )        
 
 
     def _init_vars( self ):
