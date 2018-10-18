@@ -22,7 +22,7 @@ def _deletePID():
     lw.log (loglines )
 
 pid = str(os.getpid())
-pidfile = os.path.join( p_folderpath, 'data', 'adm_auto.pid' )
+pidfile = os.path.join( p_folderpath, 'data', 'exautomation.pid' )
 atexit.register( _deletePID )
 
 class Main:
@@ -36,17 +36,17 @@ class Main:
         self._trim_downloads()
         lw.log( ['attempting to retrieve files for source %s'  % self.ARGS.source], 'info' )
         rfiles, loglines = self.SOURCE.Retrieve() 
-        lw.log( loglines, 'info' )       
+        lw.log( loglines, 'info' )     
         if not rfiles:
             return
-        lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, self.ARGS.destination)], 'info' )
-        tfiles, loglines = self.DESTINATION.Transform( rfiles )
-        lw.log( loglines, 'info' )
-        if not tfiles:
-            return
-        lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, self.ARGS.destination)], 'info' )
-        success, loglines = self.DESTINATION.Send( tfiles )
-        lw.log( loglines, 'info' )
+        for destination in self.DESTINATIONS:
+            lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[0])], 'info' )
+            tfiles, loglines = destination[1].Transform( rfiles )
+            lw.log( loglines, 'info' )
+            if tfiles:
+                lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, destination[0])], 'info' )
+                success, loglines = destination[1].Send( tfiles )
+                lw.log( loglines, 'info' )
 
 
     def _init_vars( self ):
@@ -60,23 +60,27 @@ class Main:
         except ImportError as e:
             sourcemodule = False
             lw.log( ['module for source %s could not be loaded' % self.ARGS.source, e], 'info' )
-        try:
-            destmodule = importlib.import_module( "resources.destinations." + self.ARGS.destination )
-        except ImportError as e:
-            destmodule = False
-            lw.log( ['module for destination %s could not be loaded' % self.ARGS.destination, e], 'info' )
-        if (not sourcemodule) or (not destmodule):
+        destinations = self.ARGS.destination.split( ':' )
+        destmodules = []
+        for destination in destinations:
+            try:
+                destmodules.append( [destination, importlib.import_module( "resources.destinations." + destination )] )
+            except ImportError as e:
+                lw.log( ['module for destination %s could not be loaded' % destination, e], 'info' )
+        if (not sourcemodule) or (not destmodules):
             return False
         try:
             self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
         except ValueError as e:
             lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' ) 
-            return False       
-        try:
-            self.DESTINATION = destmodule.Destination( self.DATAROOT, config, self.ARGS.source )
-        except ValueError as e:
-            lw.log( ['module for destination %s generated an error' % self.ARGS.destination, str( e )], 'info' )
             return False
+        self.DESTINATIONS = []
+        for destmodule in destmodules:       
+            try:
+                self.DESTINATIONS.append( [destmodule[0], destmodule[1].Destination( self.DATAROOT, config, self.ARGS.source )] )
+            except ValueError as e:
+                lw.log( ['module for destination %s generated an error' % destmodule[0], str( e )], 'info' )
+                return False
         return True
         
 
