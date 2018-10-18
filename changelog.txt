@@ -2,7 +2,7 @@ v.0.6.0
 - added ability to have multiple destinations
 - added Download function to FTPS class
 - cleaned up module imports
-- added a localfile example destination
+- added a localfile destination (still work in progress)
 
 v.0.5.0
 - abstracted SFTP and FTPS functions to make modules easier to build
