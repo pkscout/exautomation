@@ -1,4 +1,4 @@
-import os, sys
+import os
 from datetime import datetime, date, timedelta
 from ..common.remotesites import SFTP
 

@@ -1,4 +1,4 @@
-import chilkat, csv, os, ssl
+import csv, os
 from ..common.remotesites import FTPS
 
 class Destination:
