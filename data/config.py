@@ -21,7 +21,14 @@ defaults = { 'aborttime': 300,
              'commonapp_path': '.',
              'commonapp_dateformat': '%Y-%m-%d',
              'commonapp_fireworks_path': 'CommonApp/',
-             'commonapp_local_path': '',
+             'commonapp_localfile_path': '',
+             'fireworks_user': '',
+             'fireworks_auth': '',
+             'fireworks_baseURL': 'ftp.gotoextinguisher.com',
+             'fireworks_port': 997,
+             'fireworks_source_path':'',
+             'fireworks_dateformat': '%Y-%m-%d',
+             'fireworks_localfile_path': '',
              'sat_user': '',
              'sat_auth': '',
              'sat_baseURL': 'https://scoresdownload.collegeboard.org',
@@ -29,14 +36,8 @@ defaults = { 'aborttime': 300,
              'sat_file_path': '/pascoredwnld/file',
              'sat_dateformat': '%Y-%m-%dT00:00:00',
              'sat_fireworks_path': 'SAT/',
-             'sat_local_path': '',
-             'fireworks_user': '',
-             'fireworks_auth': '',
-             'fireworks_baseURL': 'ftp.gotoextinguisher.com',
-             'fireworks_port': 997,
-             'fireworks_source_path':'',
-             'fireworks_dateformat': '%Y-%m-%d',
-             'fireworks_local_path': '' }
+             'sat_localfile_path': ''
+           }
 
 try:
     import data.settings as overrides

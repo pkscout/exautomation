@@ -43,7 +43,7 @@ class Destination:
             destfile = os.path.join( self.DATAROOT, 'downloads', destfilename )
             loglines.append( 'attempting to convert file' )
             loglines.append( 'opening %s' % orgfile )
-            with open( orgfile,"r" ) as source:
+            with open( orgfile, "r" ) as source:
                 rdr= csv.reader( source )
                 with open( destfile, "w" ) as result:
                     wtr = csv.writer( result )
