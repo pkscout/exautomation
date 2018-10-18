@@ -17,20 +17,20 @@ class SFTP:
             if self.CONFIG.get( 'key_auth' ):
                 key.put_Password( self.CONFIG.get( 'key_auth' ) );
             success = key.FromOpenSshPrivateKey( privatekey )
-            if (success != True):
+            if not success:
                 key = None   
         else:
             key = None
         loglines.append( 'connecting to %s server' % self.CONFIG.get( 'module_name', '' ) )
         sftp = chilkat.CkSFtp()
         success = sftp.UnlockComponent( self.CONFIG.get( 'chilkat_license', 'Anything for 30 day trial' ) )
-        if (success != True):
+        if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
         sftp.put_ConnectTimeoutMs( self.CONFIG.get( 'timeout', 15000 ) )
         sftp.put_IdleTimeoutMs( self.CONFIG.get( 'timeout', 15000 ) )
         success = sftp.Connect( self.CONFIG.get( 'host' ), self.CONFIG.get( 'port', 22 ) )
-        if (success != True):
+        if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
         success, cloglines = CheckHostKey( sftp.hostKeyFingerprint(), self.CONFIG.get( 'hostkey' ) )
@@ -44,18 +44,18 @@ class SFTP:
             success = sftp.AuthenticatePk( self.CONFIG.get( 'username', '' ), key )
         else:
             success = False
-        if (success != True):
+        if not success:
             if key and self.CONFIG.get( 'debug' ):
                 loglines.append( sftp.lastErrorText() )
             elif key:
                 loglines.append( 'private key based authentication failed' )
             loglines.append( 'trying to authentication with username and password' )
             success = sftp.AuthenticatePw( self.CONFIG.get( 'username', '' ), self.CONFIG.get( 'auth', '' ) )
-            if (success != True):
+            if not success:
                 loglines.append( sftp.lastErrorText() )
                 return False, loglines
         success = sftp.InitializeSftp()
-        if (success != True):
+        if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
         return sftp, loglines
@@ -95,7 +95,7 @@ class SFTP:
                         dlist.append( filename )
                     else:
                         loglines.append( 'unable to download %s to %s' % (remotefile, localfile) )
-                        if self.DEBUG:
+                        if self.CONFIG.get( 'debug' ):
                            loglines.append( sftp.lastErrorText() ) 
         success = sftp.CloseHandle( handle )
         if not success and self.CONFIG.get( 'debug' ):
@@ -115,7 +115,7 @@ class FTPS:
         loglines = []
         ftps = chilkat.CkFtp2()
         success = ftps.UnlockComponent( self.CONFIG.get( 'chilkat_license', 'Anything for 30 day trial' ) )
-        if (success != True):
+        if not success:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         loglines.append( 'connecting to %s server' % self.CONFIG.get( 'module_name', '' ) )
@@ -127,12 +127,52 @@ class FTPS:
         ftps.put_AuthTls( self.CONFIG.get( 'ftps_authtls', True ) )
         ftps.put_Ssl( self.CONFIG.get( 'ftps_ssl', False ) )
         success = ftps.Connect()
-        if (success != True):
+        if not success:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         return ftps, loglines
     
-    
+
+    def Download( self, destination, filter='', path='' ):
+        loglines = []
+        dlist = []
+        ftps, cloglines = self._connect()
+        loglines.extend( cloglines )
+        if not ftps:
+            return False, loglines
+        if path:
+            success = ftps.ChangeRemoteDir( path )
+            if not success:
+                loglines.append( ftps.lastErrorText() )
+                return False, loglines
+        n = ftps.GetDirCount()
+        if n < 0:
+            loglines.append( ftps.lastErrorText() )
+            return False, loglines        
+        elif n == 0:
+            loglines.append( 'no files in directory' )
+        else:
+            for i in range( 0, n ):
+                filename = ftps.getFilename( i )
+                if self.CONFIG.get( 'debug' ):
+                    loglines.append( 'checking file ' + filename )
+                if filter in filename:
+                    localfile = os.path.join( destination, filename )
+                    success = ftps.GetFile( filename, localfile )
+                    if success == True:
+                        loglines.append( 'downloaded %s to %s' % (filename, localfile) )
+                        dlist.append( filename )
+                    else:
+                        loglines.append( 'unable to download %s to %s' % (filename, localfile) )
+                        if self.CONFIG.get( 'debug' ):
+                           loglines.append( sftp.lastErrorText() ) 
+
+        success = ftps.Disconnect()
+        if not success and self.CONFIG.get( 'debug' ):
+            loglines.append( sftp.lastErrorText() )
+        return dlist, loglines
+
+
     def Upload( self, files, origin, path='' ):
         loglines = []
         ftps, cloglines = self._connect()
@@ -140,7 +180,7 @@ class FTPS:
         if not ftps:
             return False, loglines
         success = ftps.ChangeRemoteDir( path )
-        if (success != True):
+        if not success:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         loglines.append( 'setting destination directory to ' + path )
@@ -150,7 +190,7 @@ class FTPS:
             loglines.append( 'transferring file ' + file )
             filepath = os.path.join( origin, file )
             success = ftps.PutFile( filepath, file )
-            if (success != True):
+            if not success:
                 loglines.append( ftps.lastErrorText() )
                 fsuccess = False
         loglines.append( 'disconnecting from FTPS server' )
