@@ -44,8 +44,8 @@ usage: execute.py [-h] -s SOURCE -d DESTINATION [-t DATE]
 -s SOURCE, --source SOURCE  
 the source for the file
 
--d DESTINATION, --destination DESTINATION  
-the destination for the file
+-d DESTINATIONS, --destination DESTINATIONS  
+the destinations for the file (multiple destinations should be separated by a colon)
 
 ### Optional arguments:
 -h, --help  
