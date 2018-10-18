@@ -87,7 +87,7 @@ class Main:
     def _parse_argv( self ):
         parser = argparse.ArgumentParser()
         parser.add_argument( "-s", "--source", help="REQUIRED the external source", required=True )
-        parser.add_argument( "-d", "--destination", help="REQUIRED the external destination", required=True )
+        parser.add_argument( "-d", "--destination", help="REQUIRED the external destinations (destinations should be separated by a colon)", required=True )
         parser.add_argument( "-t", "--date", help="override the default date behavior with a specific date (format yyyy-mm-dd unless overriden in settings.py)" )
         self.ARGS = parser.parse_args()
 
