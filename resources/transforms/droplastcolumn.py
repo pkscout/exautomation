@@ -5,11 +5,11 @@ class Transform:
         pass
 
 
-    def Run( self, orgfile, destfile, quote='all' ):
+    def Run( self, orgfile, destfile, config ):
         with open( orgfile, "r" ) as source:
             data = csv.reader( source )
             with open( destfile, "w" ) as result:
-                if quote == 'all':
+                if config.get( 'quoteall', True ):
                     wtr = csv.writer( result, quoting=csv.QUOTE_ALL )
                 else:
                     wtr = csv.writer( result )
