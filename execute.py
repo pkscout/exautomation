@@ -82,7 +82,7 @@ class Main:
             return files
         ffiles = []
         for file in files:
-            if filter in file:
+            if re.search(filter, file):
                 ffiles.append( file )
         return ffiles
 
