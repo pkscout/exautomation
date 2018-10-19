@@ -1,12 +1,13 @@
 # *  Credits:
 # *
-# *  v.0.6.0
+# *  v.1.0.0
 # *  original exautomation code by Kyle Johnson
 
-import atexit, argparse, importlib, os, random, subprocess, sys, time
+import atexit, argparse, os, random, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
-from resources.common.fileops import writeFile, deleteFile, checkPath
+from resources.common.fileops import checkPath, deleteFile, renameFile, writeFile
+import resources.connections, resources.transforms
 if sys.version_info < (3, 0):
     from ConfigParser import *
 else:
@@ -16,6 +17,22 @@ p_folderpath, p_filename = os.path.split( os.path.realpath(__file__) )
 checkPath( os.path.join( p_folderpath, 'data', 'logs', '' ) )
 lw = Logger( logfile=os.path.join( p_folderpath, 'data', 'logs', 'logfile.log' ),
              logconfig='timed', numbackups=config.Get( 'logbackups' ), logdebug=str( config.Get( 'debug' ) ) )
+
+connection_modules = {}
+for module in resources.connections.__all__:
+    full_plugin = 'resources.connections.' + module
+    __import__( full_plugin )
+    imp_plugin = sys.modules[ full_plugin ]
+    lw.log( ['loaded plugin ' + module] )
+    connection_modules[module] = imp_plugin
+transform_modules = {}
+for module in resources.transforms.__all__:
+    full_plugin = 'resources.transforms.' + module
+    __import__( full_plugin )
+    imp_plugin = sys.modules[ full_plugin ]
+    lw.log( ['loaded plugin ' + module] )
+    transform_modules[module] = imp_plugin
+
 
 def _deletePID():
     success, loglines = deleteFile( pidfile )
@@ -35,18 +52,39 @@ class Main:
             return
         self._trim_downloads()
         lw.log( ['attempting to retrieve files for source %s'  % self.ARGS.source], 'info' )
-        rfiles, loglines = self.SOURCE.Retrieve() 
+        rfiles, loglines = self.SOURCE.Download() 
         lw.log( loglines, 'info' )     
         if not rfiles:
+            lw.log( ['no files retrieved'], 'info' )
             return
         for destination in self.DESTINATIONS:
-            lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[0])], 'info' )
-            tfiles, loglines = destination[1].Transform( rfiles )
+            lw.log( ['filtering files'], 'info' )
+            ffiles = self._filter_files( rfiles, destination[1].get( 'filters' ) )
+            if not ffiles:
+                lw.log( ['no files remaining to process after running filter'], 'info' )
+                return            
+            lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
+            try:
+                self._transform_files( ffiles, destination[1].get( 'transforms' ) )
+            except OSError as e:
+                lw.log( ['error during tranformation process', str( e )] )
+                return
+            lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
+            success, loglines = destination[0].Upload( ffiles )
             lw.log( loglines, 'info' )
-            if tfiles:
-                lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, destination[0])], 'info' )
-                success, loglines = destination[1].Send( tfiles )
-                lw.log( loglines, 'info' )
+
+
+    def _filter_files( self, files, filters ):
+        if not filters:
+            return files
+        filter = self._parse_items( filters ).get( self.ARGS.source )
+        if not filter:
+            return files
+        ffiles = []
+        for file in files:
+            if filter in file:
+                ffiles.append( file )
+        return ffiles
 
 
     def _init_vars( self ):
@@ -55,31 +93,33 @@ class Main:
         for onedir in thedirs:
             exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir, '' ) )
             lw.log( loglines )
+        for source in config.Get( 'sources' ):
+            if source['name'] == self.ARGS.source:
+                settings = source
+                break
+        settings['override_date'] = self.ARGS.date
+        settings['dataroot'] = self.DATAROOT
         try:
-            sourcemodule = importlib.import_module( "resources.sources." + self.ARGS.source )
-        except ImportError as e:
-            sourcemodule = False
-            lw.log( ['module for source %s could not be loaded' % self.ARGS.source, e], 'info' )
-        destinations = self.ARGS.destination.split( ':' )
-        destmodules = []
-        for destination in destinations:
-            try:
-                destmodules.append( [destination, importlib.import_module( "resources.destinations." + destination )] )
-            except ImportError as e:
-                lw.log( ['module for destination %s could not be loaded' % destination, e], 'info' )
-        if (not sourcemodule) or (not destmodules):
-            return False
-        try:
-            self.SOURCE = sourcemodule.Source( self.DATAROOT, config, self.ARGS.date )
+            self.SOURCE = connection_modules[settings['type']].Connection( config, settings )
         except ValueError as e:
-            lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' ) 
+            lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' )
             return False
+        except UnboundLocalError as e:
+            lw.log( ['no module matching %s found' % self.ARGS.source], 'info' )
+            return False
+        settings_list = []
+        for destination in config.Get( 'destinations' ):
+            if destination['name'] in self.ARGS.destination:
+                settings_list.append( destination )
         self.DESTINATIONS = []
-        for destmodule in destmodules:       
+        for settings in settings_list:
+            settings['destpath'] = self.ARGS.source
+            settings['override_date'] = self.ARGS.date
+            settings['dataroot'] = self.DATAROOT
             try:
-                self.DESTINATIONS.append( [destmodule[0], destmodule[1].Destination( self.DATAROOT, config, self.ARGS.source )] )
+                self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
             except ValueError as e:
-                lw.log( ['module for destination %s generated an error' % destmodule[0], str( e )], 'info' )
+                lw.log( ['module for destination %s generated an error' % settings['name'], str( e )], 'info' )
                 return False
         return True
         
@@ -92,6 +132,17 @@ class Main:
         self.ARGS = parser.parse_args()
 
 
+    def _parse_items( self, items ):
+        items_dict = {}
+        if not items:
+            return {}
+        itemlist = items.split( ',' )
+        for item in itemlist:
+            item_parts = item.split(':')
+            items_dict[item_parts[0].strip()] = item_parts[1].strip()
+        return items_dict
+
+
     def _setPID( self ):
         while os.path.isfile( pidfile ):
             time.sleep( random.randint( 1, 3 ) )
@@ -102,6 +153,27 @@ class Main:
         lw.log( ['setting PID file'] )
         success, loglines = writeFile( pid, pidfile, wtype='w' )
         lw.log( loglines )        
+
+
+    def _transform_files( self, files, transforms ):
+        if not transforms:
+            return
+        transform = self._parse_items( transforms ).get( self.ARGS.source )
+        if not transform:
+            return
+        for file in files:
+            destfile = os.path.join( self.DATAROOT, 'downloads', file )
+            orgfilename = '%s-org%s' % os.path.splitext( file )
+            orgfile = os.path.join( self.DATAROOT, 'downloads', orgfilename )
+            success, loglines = renameFile( destfile, orgfile )
+            lw.log( loglines )
+            if not success:
+                raise OSError( 'error renaming file' )
+            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile )
+            lw.log( loglines )
+            if not success:
+                raise OSError( 'error transforming file' )
+            return
 
 
     def _trim_downloads( self ):

@@ -1,3 +1,6 @@
+v.1.0.0
+- complete overhaul of code (more to come later)
+
 v.0.6.0
 - added ability to have multiple destinations
 - added Download function to FTPS class

@@ -36,26 +36,26 @@ class cparser( HTMLParser ):
 
 
 
-class Source:
-    def __init__( self, dataroot, config, override_date ):
-        self.DATAROOT = dataroot
-        self.PAYLOAD = { 'email': config.Get( 'carnegie_user' ),
-                    'password': config.Get( 'carnegie_auth' ) }
-        self.BASEURL = config.Get( 'carnegie_baseURL' )
-        self.CONNURL =  self.BASEURL + config.Get( 'carnegie_path' )
+class Connection:
+    def __init__( self, config, settings ):
+        self.DATAROOT = settings.get( 'dataroot' )
+        self.PAYLOAD = { 'email': settings.get( 'user' ),
+                    'password': settings.get( 'auth' ) }
+        self.BASEURL = settings.get( 'host', config.Get( 'carnegie_baseURL' ) )
+        self.CONNURL =  self.BASEURL + settings.get( 'path', config.Get( 'carnegie_path' ) )
         self.DEBUG = config.Get( 'debug' )
-        if override_date:
+        if settings.get( 'override_date' ) and settings.get( 'override_date' ) != 'all':
             try:
-                filedate = datetime.strptime( override_date, config.Get( 'override_dateformat' ) ).date()
+                filedate = datetime.strptime( settings.get( 'override_date' ), config.Get( 'override_dateformat' ) ).date()
             except ValueError as e:
                 print( 'Error: ' + str( e ) )
                 raise ValueError( str( e ) )
         else:
             filedate = date.today() - timedelta(1)
-        self.FILEDATE = filedate.strftime( config.Get( 'carnegie_dateformat' ) )
+        self.FILEDATE = filedate.strftime( settings.get( 'dateformat', config.Get( 'dateformat' ) ) )
 
         
-    def Retrieve( self ):
+    def Download( self ):
         loglines = []
         with requests.Session() as s:
             loglines.append( 'attempting to get file from Carnegie server' )

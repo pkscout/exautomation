@@ -119,13 +119,13 @@ class FTPS:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         loglines.append( 'connecting to %s server' % self.CONFIG.get( 'module_name', '' ) )
-        ftps.put_Passive( self.CONFIG.get( 'ftps_passive', False ) )
+        ftps.put_Passive( self.CONFIG.get( 'passive', False ) )
         ftps.put_Hostname( self.CONFIG.get( 'host' ) )
         ftps.put_Username( self.CONFIG.get( 'username' ) )
         ftps.put_Password( self.CONFIG.get( 'auth' ) )
         ftps.put_Port( self.CONFIG.get( 'port', 990 ) )
-        ftps.put_AuthTls( self.CONFIG.get( 'ftps_authtls', True ) )
-        ftps.put_Ssl( self.CONFIG.get( 'ftps_ssl', False ) )
+        ftps.put_AuthTls( self.CONFIG.get( 'authtls', True ) )
+        ftps.put_Ssl( self.CONFIG.get( 'ssl', False ) )
         success = ftps.Connect()
         if not success:
             loglines.append( ftps.lastErrorText() )
