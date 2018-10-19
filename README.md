@@ -3,7 +3,8 @@ Python command line tool to automate various file exchanges
 
 ## PREREQUISITES:
 * Python 3.x (tested with Python 3.7, might work with Python 2.x, but I doubt it)
-requests module (pip3 install requests)
+* requests module (pip3 install requests)
+* panda module (pip3 install panda)
 * chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)
 
 
