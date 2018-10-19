@@ -3,7 +3,7 @@
 # *  v.1.0.0
 # *  original exautomation code by Kyle Johnson
 
-import atexit, argparse, os, random, sys, time
+import atexit, argparse, os, random, re, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
 from resources.common.fileops import checkPath, deleteFile, renameFile, writeFile
@@ -65,7 +65,7 @@ class Main:
                 return            
             lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
             try:
-                self._transform_files( ffiles, destination[1].get( 'transforms' ) )
+                self._transform_files( ffiles, destination[1] )
             except OSError as e:
                 lw.log( ['error during tranformation process', str( e )] )
                 return
@@ -155,7 +155,8 @@ class Main:
         lw.log( loglines )        
 
 
-    def _transform_files( self, files, transforms ):
+    def _transform_files( self, files, destconfig ):
+        transforms = destconfig.get( 'transforms' )
         if not transforms:
             return
         transform = self._parse_items( transforms ).get( self.ARGS.source )
@@ -169,7 +170,7 @@ class Main:
             lw.log( loglines )
             if not success:
                 raise OSError( 'error renaming file' )
-            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile )
+            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( transform + '_config', {} ) )
             lw.log( loglines )
             if not success:
                 raise OSError( 'error transforming file' )

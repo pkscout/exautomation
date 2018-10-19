@@ -133,13 +133,16 @@ def popenWithTimeout( command, timeout ):
         return True, log_lines
 
 
-def readFile( filename ):
+def readFile( filename, encoding='' ):
     log_lines = []
     if _exists( filename ):
         try:
             thefile = xbmcvfs.File( filename, 'r' )
         except:
-            thefile = open( filename, 'r' )
+            if encoding:
+                thefile = open( filename, 'r', encoding=encoding )
+            else:
+                thefile = open( filename, 'r' )
         try:
             data = thefile.read()
             thefile.close()
