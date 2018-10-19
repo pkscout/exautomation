@@ -103,7 +103,11 @@ class SFTP:
         if not dlist:
             loglines.append( ['no files matching filter ' + filter] )
         return dlist, loglines
-   
+
+
+    def Upload( self, files, origin, path='' ):
+        return False, ['Upload not implemented in SFTP module yet']
+
 
 
 class FTPS:    
@@ -184,7 +188,6 @@ class FTPS:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
         loglines.append( 'setting destination directory to ' + path )
-        loglines.append( 'transferring files to FTPS server' )
         fsuccess = True
         for file in files:        
             loglines.append( 'transferring file ' + file )

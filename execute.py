@@ -61,13 +61,9 @@ class Main:
             lw.log( ['filtering files'], 'info' )
             ffiles = self._filter_files( rfiles, destination[1].get( 'filters' ) )
             if not ffiles:
-                lw.log( ['no files remaining to process after running filter'], 'info' )
                 return            
             lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
-            try:
-                self._transform_files( ffiles, destination[1] )
-            except OSError as e:
-                lw.log( ['error during tranformation process', str( e )] )
+            if not self._transform_files( ffiles, destination[1] ):
                 return
             lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
             success, loglines = destination[0].Upload( ffiles )
@@ -79,11 +75,14 @@ class Main:
             return files
         filter = self._parse_items( filters ).get( self.ARGS.source )
         if not filter:
+            lw.log( ['no filters needed for source ' + self.ARGS.source], 'info' )
             return files
         ffiles = []
         for file in files:
             if re.search(filter, file):
                 ffiles.append( file )
+        if ffiles:
+            lw.log( ['no files remaining to process after running filter ' + filter], 'info' )
         return ffiles
 
 
@@ -161,7 +160,9 @@ class Main:
             return
         transform = self._parse_items( transforms ).get( self.ARGS.source )
         if not transform:
-            return
+            lw.log( ['no transformation needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
+            return False
+        lw.log( ['transforming files using %s transform' % transform], 'info' )
         for file in files:
             destfile = os.path.join( self.DATAROOT, 'downloads', file )
             orgfilename = '%s-org%s' % os.path.splitext( file )
@@ -169,12 +170,13 @@ class Main:
             success, loglines = renameFile( destfile, orgfile )
             lw.log( loglines )
             if not success:
-                raise OSError( 'error renaming file' )
-            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( transform + '_config', {} ) )
+                lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
+                return False
+            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
             lw.log( loglines )
             if not success:
-                raise OSError( 'error transforming file' )
-            return
+                lw.log( ['error transforming file ' + file], 'info' )
+            return True
 
 
     def _trim_downloads( self ):

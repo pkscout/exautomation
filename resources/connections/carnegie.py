@@ -80,3 +80,7 @@ class Connection:
             else:
                 loglines.append( 'no file to get today' )
                 return False, loglines
+
+
+    def Upload( self, files ):
+        return False, ['Upload not implemented for Carnegie module']

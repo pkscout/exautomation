@@ -81,3 +81,7 @@ class Connection:
                     dlist.append( file['fileName'] )
                 return dlist, loglines
         return False, loglines
+        
+        
+    def Upload( self, files ):
+        return False, ['Upload not implemented for SAT module']

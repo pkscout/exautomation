@@ -31,3 +31,8 @@ class Connection:
     def Download( self ):
         sftp = SFTP( self.CONFIG )
         return sftp.Download( destination=os.path.join( self.DATAROOT, 'downloads' ), filter=self.FILEDATE, path=self.REMOTEPATH  )
+        
+
+    def Upload( self, files ):
+        sftp = SFTP( self.CONFIG )
+        return sftp.Upload( files=files, origin=os.path.join( self.DATAROOT, 'downloads' ), path=self.REMOTEPATH )
