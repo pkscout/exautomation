@@ -106,7 +106,25 @@ class SFTP:
 
 
     def Upload( self, files, origin, path='' ):
-        return False, ['Upload not implemented in SFTP module yet']
+        loglines = []
+        sftp, cloglines = self._connect()
+        loglines.extend( cloglines )
+        if not sftp:
+            return False, loglines
+        fsuccess = True
+        for file in files:        
+            loglines.append( 'transferring file ' + file )
+            remotefilepath = '/'.join( [path, file] )
+            localfilepath = os.path.join( origin, file )
+            success = sftp.UploadFileByName(remotefilepath,localfilepath)
+            if not success:
+                loglines.append( ftps.lastErrorText() )
+                fsuccess = False
+        loglines.append( 'disconnecting from SFTP server' )
+        success = sftp.Disconnect()
+        if not success and self.CONFIG.get( 'debug' ):
+            loglines.append( sftp.lastErrorText() )
+        return fsuccess, loglines
 
 
 
