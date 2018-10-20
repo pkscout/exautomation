@@ -159,11 +159,11 @@ class Main:
         transforms = destconfig.get( 'transforms' )
         tfiles = []
         if not transforms:
-            return
+            return files
         transform = self._parse_items( transforms ).get( self.ARGS.source )
         if not transform:
             lw.log( ['no transformation needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
-            return False
+            return files
         lw.log( ['transforming files using %s transform' % transform], 'info' )
         for file in files:
             destfile = os.path.join( self.DATAROOT, 'downloads', file )
