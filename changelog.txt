@@ -1,5 +1,13 @@
 v.1.0.0
-- complete overhaul of code (more to come later)
+- changed the modules from sources and destinations to connections and transforms
+- sources are now defined by a type of connection
+- destinations are now defined by a type of connection with filters (plain text or regex) and transforms
+- all source and destination configuration now done in a python dict in the settings file
+- all connections have Download and Upload functions (even if they do nothing in some cases)
+- connections included are carnegie, ftps, localfile, sat, sftp
+- transforms included are dropcolumns and fixedtocsv
+- completely revamped readme file
+- the default date filter can be overriden with plain text or regex if needed
 
 v.0.6.0
 - added ability to have multiple destinations
