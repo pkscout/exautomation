@@ -3,7 +3,7 @@
 # *  v.1.0.0
 # *  original exautomation code by Kyle Johnson
 
-import atexit, argparse, os, random, re, sys, time
+import atexit, argparse, os, pathlib, random, re, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
 from resources.common.fileops import checkPath, deleteFile, renameFile, writeFile
@@ -63,10 +63,11 @@ class Main:
             if not ffiles:
                 return            
             lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
-            if not self._transform_files( ffiles, destination[1] ):
+            tfiles = self._transform_files( ffiles, destination[1] )
+            if not tfiles:
                 return
             lw.log( ['attempting to send files from source %s to destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
-            success, loglines = destination[0].Upload( ffiles )
+            success, loglines = destination[0].Upload( tfiles )
             lw.log( loglines, 'info' )
 
 
@@ -156,6 +157,7 @@ class Main:
 
     def _transform_files( self, files, destconfig ):
         transforms = destconfig.get( 'transforms' )
+        tfiles = []
         if not transforms:
             return
         transform = self._parse_items( transforms ).get( self.ARGS.source )
@@ -172,11 +174,14 @@ class Main:
             if not success:
                 lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
                 return False
-            success, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
+            tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
             lw.log( loglines )
-            if not success:
+            if tfile:
+                tpath = pathlib.PurePath( tfile )
+                tfiles.append( tpath.name )
+            else:
                 lw.log( ['error transforming file ' + file], 'info' )
-            return True
+            return tfiles
 
 
     def _trim_downloads( self ):

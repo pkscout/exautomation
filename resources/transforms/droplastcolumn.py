@@ -16,4 +16,4 @@ class Transform:
                 for row in data:
                     del row[-1]
                     wtr.writerow( row )
-        return True, []
+        return destfile, ['droplastcolumn transform complete']

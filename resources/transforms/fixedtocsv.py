@@ -1,4 +1,4 @@
-import csv
+import csv, os, pathlib
 from ..common.fileops import readFile
 
 class Transform:
@@ -25,6 +25,9 @@ class Transform:
                 item = line[col[0]-1:col[1]].strip()
                 entry.append( item )
             data.append( entry )
+        if not destfile.endswith('.csv'):
+            destpath = pathlib.PurePath( destfile )
+            destfile = os.path.join( destpath.parent, destpath.stem + '.csv' )
         with open( destfile, "w" ) as result:
             if config.get( 'quoteall', True ):
                 wtr = csv.writer( result, quoting=csv.QUOTE_ALL )
@@ -34,5 +37,5 @@ class Transform:
                 wtr.writerow( config.get( 'header' ) )
             for row in data:
                 wtr.writerow( row )
-        return True, loglines
+        return destfile, loglines
 
