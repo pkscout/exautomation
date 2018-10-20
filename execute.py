@@ -97,8 +97,8 @@ class Main:
             if source['name'] == self.ARGS.source:
                 settings = source
                 break
-        if self.ARGS.date:
-            settings['override_date'] = self.ARGS.date
+        if self.ARGS.filter:
+            settings['override_date'] = self.ARGS.filter
         settings['dataroot'] = self.DATAROOT
         try:
             self.SOURCE = connection_modules[settings['type']].Connection( config, settings )
@@ -111,8 +111,8 @@ class Main:
                 settings_list.append( destination )
         self.DESTINATIONS = []
         for settings in settings_list:
-            settings['destpath'] = self.ARGS.source
-            settings['override_date'] = self.ARGS.date
+            settings['sourcefolder'] = self.ARGS.source
+            settings['override_date'] = self.ARGS.filter
             settings['dataroot'] = self.DATAROOT
             self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
         return True
@@ -122,7 +122,7 @@ class Main:
         parser = argparse.ArgumentParser()
         parser.add_argument( "-s", "--source", help="REQUIRED the external source", required=True )
         parser.add_argument( "-d", "--destination", help="REQUIRED the external destinations (destinations should be separated by a colon)", required=True )
-        parser.add_argument( "-t", "--date", help="overrides the default date behavior or source filter)" )
+        parser.add_argument( "-f", "--filter", help="overrides the default date behavior or source filter)" )
         self.ARGS = parser.parse_args()
 
 
