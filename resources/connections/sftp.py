@@ -16,7 +16,8 @@ class Connection:
             self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
         except ValueError as e:        
             self.FILTER = thedate
-        self.REMOTEPATH = settings.get( 'path', '.' )
+        self.REMOTEPATH = settings.get( 'path' )
+        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.CONFIG = {}
         self.CONFIG['debug'] = config.Get( 'debug' )     
         self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
@@ -32,9 +33,12 @@ class Connection:
     
     def Download( self ):
         sftp = SFTP( self.CONFIG )
-        return sftp.Download( destination=os.path.join( self.DATAROOT, 'downloads' ), filter=self.FILTER, path=self.REMOTEPATH  )
+        destination = os.path.join( self.DATAROOT, 'downloads' )
+        return sftp.Download( destination=destination, filter=self.FILTER, path=self.REMOTEPATH  )
         
 
     def Upload( self, files ):
         sftp = SFTP( self.CONFIG )
-        return sftp.Upload( files=files, origin=os.path.join( self.DATAROOT, 'downloads' ), path=self.REMOTEPATH )
+        origin = os.path.join( self.DATAROOT, 'downloads' )
+        path = '/'.join( [self.REMOTEPATH, self.SOURCEFOLDER] )
+        return sftp.Upload( files=files, origin=origin, path=path )

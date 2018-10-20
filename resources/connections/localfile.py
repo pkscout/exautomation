@@ -1,6 +1,6 @@
 import os, re
 from datetime import datetime, date, timedelta
-from ..common.fileops import copyFile
+from ..common.fileops import checkPath, copyFile
 
 class Connection:
     def __init__( self, config, settings ):
@@ -17,6 +17,7 @@ class Connection:
         except ValueError as e:        
             self.FILTER = thedate
         self.REMOTEPATH = settings.get( 'path' )
+        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
     
     
     def Download( self ):
@@ -46,7 +47,11 @@ class Connection:
         overall_success = True
         for file in files:
             srcpath = os.path.join( self.DATAROOT, 'downloads', file )
-            destpath = os.path.join( self.REMOTEPATH, file )
+            remotefolder = os.path.join( self.REMOTEPATH, self.SOURCEFOLDER )
+            success, cloglines = checkPath( remotefolder )
+            if not success:
+                loglines.extend( cloglines )
+            destpath = os.path.join( remotefolder, file )
             success, cloglines = copyFile( src=srcpath, dst=destpath )
             loglines.extend( cloglines )
             if not success:

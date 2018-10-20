@@ -17,6 +17,8 @@ class Connection:
             self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
         except ValueError as e:        
             self.FILTER = thedate
+        self.REMOTEPATH = settings.get( 'path' )
+        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.JSONURL = URL( 'json', {'Accept':'application/json', 'Content-Type': 'application/json'} )
         self.TEXTURL = URL( 'text' )
         self.ZIPURL = URL( 'binary' )

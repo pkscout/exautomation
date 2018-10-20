@@ -50,6 +50,8 @@ class Connection:
             self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
         except ValueError as e:        
             self.FILTER = thedate
+        self.REMOTEPATH = settings.get( 'path' )
+        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.PAYLOAD = { 'email': settings.get( 'user' ),
                     'password': settings.get( 'auth' ) }
         self.BASEURL = settings.get( 'host', config.Get( 'carnegie_baseURL' ) )
