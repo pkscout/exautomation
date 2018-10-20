@@ -3,27 +3,11 @@ sources = []
 destinations = []
 
 # GENERAL CONFIGURATION
-# see the default section in config.py for other things you can override here
-chilkat_license = 'Anything for 30-day trial' #put license key here after purchase
+# see the README for information on other things you can put here
 gmtoffset = '' #put in your GMT offset here, otherwise all times will be GMT
 
-# sources and destinations are construction with modules in the resources/connections directory
-# you set the connection module in the type field
-# sources and destinations must have a unique name, and source names are used as the directory
-# name for destinations that need a directory (like sftp and ftps)
-# destinations can filter a file list returned by a source and also transform a file if needed
-# filters are just text that must be in the file name
-# you set filters for a given source by using <source>:<text>, <source2>:<text2>
-# filters may be regular expressions or plain text
-# transforms are modules in the resources/transforms directory
-# you set transform modules for a given source by using <source>:<module>, <source2>:<module2>
-# transforms can have configurations (based on the transform). to configure a transform add
-# <source>_<transform>_config as a python dict to the given destination (see example below)
-# NOTE: the ACT transform below actually converts the ACT fixed width to a CSV for Fireworks
-# so you might want to keep that
-
 # you can delete any of the sources and destinations below if you aren't using them
-
+#SOURCE CONFIGURATIONS
 # CARNEGIE/DARLET SOURCE CONFIGURATION
 sources.append( { 'name': 'Carnegie',
                   'type': 'carnegie',
@@ -53,6 +37,7 @@ sources.append( { 'name': 'ACT',
                   'path': '/Local/Folder/Path'
                 } )
 
+# DESTINATION CONFIGURATIONS
 # FIREWORKS DESTINATION CONFIGURATION
 destinations.append( { 'name': 'Fireworks',
                        'type': 'ftps',
