@@ -9,7 +9,7 @@ class cparser( HTMLParser ):
         self.EXTRACTING = False
         self.TESTLINK = ''
         self.LATESTLINK = ''
-        self.FILEDATE = filedate
+        self.FILTER = filedate
         
         
     def handle_starttag(self, tag, attrs):
@@ -24,7 +24,7 @@ class cparser( HTMLParser ):
 
     def handle_data( self, data ):
         if self.EXTRACTING:
-            name = 'PCU-%s.csv' % self.FILEDATE
+            name = 'PCU-%s.csv' % self.FILTER
             if data == name:
                 self.LATESTLINK = self.TESTLINK
 
@@ -39,20 +39,22 @@ class cparser( HTMLParser ):
 class Connection:
     def __init__( self, config, settings ):
         self.DATAROOT = settings.get( 'dataroot' )
+        if settings.get( 'override_date' ):
+            dateformat = config.Get( 'override_dateformat' )
+        else:
+            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
+        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
+        try:
+            self.FILTER = datetime.strptime( thedate, dateformat ).date()
+        except TypeError as e:
+            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
+        except ValueError as e:        
+            self.FILTER = thedate
         self.PAYLOAD = { 'email': settings.get( 'user' ),
                     'password': settings.get( 'auth' ) }
         self.BASEURL = settings.get( 'host', config.Get( 'carnegie_baseURL' ) )
         self.CONNURL =  self.BASEURL + settings.get( 'path', config.Get( 'carnegie_path' ) )
         self.DEBUG = config.Get( 'debug' )
-        if settings.get( 'override_date' ) and settings.get( 'override_date' ) != 'all':
-            try:
-                filedate = datetime.strptime( settings.get( 'override_date' ), config.Get( 'override_dateformat' ) ).date()
-            except ValueError as e:
-                print( 'Error: ' + str( e ) )
-                raise ValueError( str( e ) )
-        else:
-            filedate = date.today() - timedelta(1)
-        self.FILEDATE = filedate.strftime( settings.get( 'dateformat', config.Get( 'dateformat' ) ) )
 
         
     def Download( self ):
@@ -60,11 +62,11 @@ class Connection:
         with requests.Session() as s:
             loglines.append( 'attempting to get file from Carnegie server' )
             p = s.post( self.CONNURL, data = self.PAYLOAD )
-            parser = cparser( self.FILEDATE )
+            parser = cparser( self.FILTER )
             parser.feed( p.text )
             if parser.LATESTLINK:
                 loglines.append( 'getting ' + parser.LATESTLINK )
-                destfile = 'PCU-%s.csv' % self.FILEDATE
+                destfile = 'PCU-%s.csv' % self.FILTER
                 dest = os.path.join( self.DATAROOT, 'downloads', destfile)
                 rURL = self.BASEURL + parser.LATESTLINK + '?send=True'
                 r = s.get( rURL, stream=True )

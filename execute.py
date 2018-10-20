@@ -80,7 +80,7 @@ class Main:
             return files
         ffiles = []
         for file in files:
-            if re.search(filter, file):
+            if re.search( filter, file ):
                 ffiles.append( file )
         if ffiles:
             lw.log( ['no files remaining to process after running filter ' + filter], 'info' )
@@ -97,13 +97,11 @@ class Main:
             if source['name'] == self.ARGS.source:
                 settings = source
                 break
-        settings['override_date'] = self.ARGS.date
+        if self.ARGS.date:
+            settings['override_date'] = self.ARGS.date
         settings['dataroot'] = self.DATAROOT
         try:
             self.SOURCE = connection_modules[settings['type']].Connection( config, settings )
-        except ValueError as e:
-            lw.log( ['module for source %s generated an error' % self.ARGS.source, str( e )], 'info' )
-            return False
         except UnboundLocalError as e:
             lw.log( ['no module matching %s found' % self.ARGS.source], 'info' )
             return False
@@ -116,11 +114,7 @@ class Main:
             settings['destpath'] = self.ARGS.source
             settings['override_date'] = self.ARGS.date
             settings['dataroot'] = self.DATAROOT
-            try:
-                self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
-            except ValueError as e:
-                lw.log( ['module for destination %s generated an error' % settings['name'], str( e )], 'info' )
-                return False
+            self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
         return True
         
 
@@ -128,7 +122,7 @@ class Main:
         parser = argparse.ArgumentParser()
         parser.add_argument( "-s", "--source", help="REQUIRED the external source", required=True )
         parser.add_argument( "-d", "--destination", help="REQUIRED the external destinations (destinations should be separated by a colon)", required=True )
-        parser.add_argument( "-t", "--date", help="override the default date behavior with a specific date (format yyyy-mm-dd unless overriden in settings.py)" )
+        parser.add_argument( "-t", "--date", help="overrides the default date behavior or source filter)" )
         self.ARGS = parser.parse_args()
 
 

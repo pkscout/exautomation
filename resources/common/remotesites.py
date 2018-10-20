@@ -1,6 +1,6 @@
 # v.0.1.0
     
-import chilkat, os
+import chilkat, os, re
 from .fileops import readFile, writeFile
 from .hostkeys import CheckHostKey
     
@@ -61,7 +61,7 @@ class SFTP:
         return sftp, loglines
  
  
-    def Download( self, destination, filter='', path='.' ):
+    def Download( self, destination, filter='', path='' ):
         loglines = []
         dlist = []
         sftp, cloglines = self._connect()
@@ -76,18 +76,19 @@ class SFTP:
         if (sftp.get_LastMethodSuccess() != True):
             loglines.append( sftp.lastErrorText() )
             return False, loglines
-        if path == '.':
-            remotepath = ''
         n = dirlisting.get_NumFilesAndDirs()
         if n == 0:
             loglines.append( 'no files in directory' )
         else:
             for i in range( 0, n ):
                 filename = dirlisting.GetFileObject( i ).filename()
-                remotefile = remotepath + filename
+                if path:
+                    remotefile = '/'.join( [path, filename] )
+                else:
+                    remotefile = filename
                 if self.CONFIG.get( 'debug' ):
                     loglines.append( 'checking file ' + filename )
-                if filter in filename:
+                if re.search( filter, filename ):
                     localfile = os.path.join( destination, filename )
                     success = sftp.DownloadFileByName( remotefile, localfile )
                     if success == True:
@@ -178,7 +179,7 @@ class FTPS:
                 filename = ftps.getFilename( i )
                 if self.CONFIG.get( 'debug' ):
                     loglines.append( 'checking file ' + filename )
-                if filter in filename:
+                if re.search( filter, filename ):
                     localfile = os.path.join( destination, filename )
                     success = ftps.GetFile( filename, localfile )
                     if success == True:

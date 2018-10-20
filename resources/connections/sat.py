@@ -6,6 +6,17 @@ from ..common.fileops import writeFile
 class Connection:
     def __init__( self, config, settings ):
         self.DATAROOT = settings.get( 'dataroot' )
+        if settings.get( 'override_date' ):
+            dateformat = config.Get( 'override_dateformat' )
+        else:
+            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
+        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
+        try:
+            self.FILTER = datetime.strptime( thedate, dateformat ).date()
+        except TypeError as e:
+            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
+        except ValueError as e:        
+            self.FILTER = thedate
         self.JSONURL = URL( 'json', {'Accept':'application/json', 'Content-Type': 'application/json'} )
         self.TEXTURL = URL( 'text' )
         self.ZIPURL = URL( 'binary' )
@@ -17,27 +28,15 @@ class Connection:
         payload['password'] = settings.get( 'auth' )
         self.PAYLOAD = json.dumps( payload )
         self.DEBUG = config.Get( 'debug' )
-        if settings.get( 'override_date'):
-            if settings.get( 'override_date' ) == 'all':
-                self.FILEDATE = None
-                return
-            try:
-                filedate = datetime.strptime( settings.get( 'override_date' ), config.Get( 'override_dateformat' ) ).date()
-            except ValueError as e:
-                print( 'Error: ' + str( e ) )
-                raise ValueError( str( e ) )
-        else:
-            filedate = date.today() - timedelta(1)
-        self.FILEDATE = filedate.strftime( settings.get( 'dateformat', config.Get( 'sat_dateformat' ) ) + config.Get( 'gmtoffset' ) )
 
     
     def Download( self ):
         loglines = []
         url_params = {}
         dlist = []
-        if self.FILEDATE:
-            url_params['fromDate'] = self.FILEDATE
-            loglines.append( 'getting SAT files newer than ' + self.FILEDATE )
+        if self.FILTER != 'all':
+            url_params['fromDate'] = self.FILTER
+            loglines.append( 'getting SAT files newer than ' + self.FILTER )
         else:
             loglines.append( 'getting all SAT files' )        
         success, uloglines, json_data = self.JSONURL.Post( self.LISTURL, params=url_params, data=self.PAYLOAD )

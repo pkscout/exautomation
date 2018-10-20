@@ -1,22 +1,22 @@
-import os
+import os, re
 from datetime import datetime, date, timedelta
 from ..common.fileops import copyFile
 
 class Connection:
     def __init__( self, config, settings ):
         self.DATAROOT = settings.get( 'dataroot' )
-        self.CONFIG = {}
-        self.CONFIG['debug'] = config.Get( 'debug' )     
-        self.REMOTEPATH = settings.get( 'path' )
-        if settings.get( 'override_date' ) and settings.get( 'override_date' ) != 'all':
-            try:
-                filedate = datetime.strptime( settings.get( 'override_date' ), config.Get( 'override_dateformat' ) ).date()
-            except ValueError as e:
-                print( 'Error: ' + str( e ) )
-                raise ValueError( str( e ) )
+        if settings.get( 'override_date' ):
+            dateformat = config.Get( 'override_dateformat' )
         else:
-            filedate = date.today() - timedelta(1)
-        self.FILEDATE = filedate.strftime( settings.get( 'dateformat', config.Get( 'dateformat' ) ) )
+            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
+        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
+        try:
+            self.FILTER = datetime.strptime( thedate, dateformat ).date()
+        except TypeError as e:
+            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
+        except ValueError as e:        
+            self.FILTER = thedate
+        self.REMOTEPATH = settings.get( 'path' )
     
     
     def Download( self ):
@@ -29,7 +29,7 @@ class Connection:
         except OSError as e:
             return False, ['unable to get directory listing for ' + self.REMOTEPATH, str( e )]
         for file in dirlist:
-            if self.FILEDATE in file:
+            if re.search( self.FILTER, file ):
                 srcpath = os.path.join( self.REMOTEPATH, file )
                 dstpath = os.path.join( self.DATAROOT, 'downloads', file )
                 success, cloglines = copyFile( src=srcpath, dst=dstpath )
