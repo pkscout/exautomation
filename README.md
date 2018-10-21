@@ -109,8 +109,8 @@ You can technically use this module for an unsecured FTP connection by setting b
 `'path': '<string>'` (path to the directory where the files are)  
 
 * **Notes**  
-The directory path needs to be noted in proper format for your operating system and start at the root directory for the file system.  For Unix variants (including Mac OSX) That means `/this/is/the/path`.  For Windows you have to use `C:\\this\\is\\the\\path`.
-You should be able to use this to access any file on any mounted drive (even if that mounted drive is a network share, although on Windows it will probably need to mapped to a drive letter).
+The directory path needs to be noted in POSIX format (i.e. `/this/is/the/path`) and start at the root directory for the file system.  For Windows include the drive letter as the first directory (i.e. `/C:/this/is/the/path`).
+You should be able to use this to access any file on any mounted drive (even if that mounted drive is a network share, although on Windows it will need to mapped to a drive letter).
 
 #### SAT Score Retreiver (sat)
 * **Required Settings**  
