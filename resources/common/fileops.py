@@ -1,4 +1,4 @@
-# v.0.4.4
+# v.0.5.0
 
 import shutil, time
 try:
@@ -105,6 +105,14 @@ def moveFile( src, dst ):
         log_lines.append( '%s does not exist' % src)
         success = False
     return success, log_lines + cp_loglines + dl_loglines
+
+
+def osPathFromString( spath, sep='/' ):
+    pathlist = spath.split( sep )
+    if spath.startswith( sep ):
+        pathlist.insert( 0, os.sep )
+        pathlist[1] = pathlist[1] + os.sep
+    return os.path.join(*pathlist)
 
 
 def popenWithTimeout( command, timeout ):

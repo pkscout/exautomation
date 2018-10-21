@@ -1,5 +1,5 @@
 import os, re
-from ..common.fileops import checkPath, copyFile
+from ..common.fileops import checkPath, copyFile, osPathFromString
 from ..remotesites import parseSettings
 
 class Connection:
@@ -8,7 +8,7 @@ class Connection:
         self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
-        self.REMOTEPATH = settings.get( 'path' )
+        self.REMOTEPATH = osPathFromString( settings.get( 'path' ) )
     
     
     def Download( self ):
