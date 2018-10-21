@@ -111,7 +111,7 @@ def osPathFromString( spath, sep='/' ):
     pathlist = spath.split( sep )
     if spath.startswith( sep ):
         pathlist.insert( 0, os.sep )
-        pathlist[1] = pathlist[1] + os.sep
+        pathlist[2] = pathlist[2] + os.sep
     return os.path.join(*pathlist)
 
 
