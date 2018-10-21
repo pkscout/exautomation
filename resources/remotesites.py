@@ -14,6 +14,7 @@ def parseSettings( config, settings ):
         pconfig['localdownloadpath'] = os.path.join( settings.get( 'dataroot' ), 'downloads' )
         pconfig['hostkey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_host.key' )
         pconfig['privatekey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_private.key' )
+        pconfig['sourcefolder'] = _parse_items( settings.get( 'sourcefolders' ) ).get( settings.get( 'sourcefolder_default' ), settings.get( 'sourcefolder_default' ) )
         if settings.get( 'override_date' ):
             dateformat = config.Get( 'override_dateformat' )
         else:
@@ -38,6 +39,16 @@ def checkHostkey( key, file ):
         saved_key = key
     return saved_key == key, loglines
     
+
+def _parse_items( items ):
+    items_dict = {}
+    if not items:
+        return {}
+    itemlist = items.split( ',' )
+    for item in itemlist:
+        item_parts = item.split(':')
+        items_dict[item_parts[0].strip()] = item_parts[1].strip()
+    return items_dict
 
    
 class SFTP:

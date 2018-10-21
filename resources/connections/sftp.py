@@ -5,8 +5,8 @@ class Connection:
         defaults = parseSettings( config, settings )        
         self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
+        self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
         self.REMOTEPATH = settings.get( 'path' )
-        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.CONNECTCONFIG = {}
         self.CONNECTCONFIG['debug'] = config.Get( 'debug' )     
         self.CONNECTCONFIG['chilkat_license'] = config.Get( 'chilkat_license' )

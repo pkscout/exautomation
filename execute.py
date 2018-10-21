@@ -7,6 +7,7 @@ import atexit, argparse, os, pathlib, random, re, sys, time
 import data.config as config
 from resources.common.xlogger import Logger
 from resources.common.fileops import checkPath, deleteFile, renameFile, writeFile
+from resources.remotesites import _parse_items
 import resources.connections, resources.transforms
 if sys.version_info < (3, 0):
     from ConfigParser import *
@@ -111,7 +112,7 @@ class Main:
                 settings_list.append( destination )
         self.DESTINATIONS = []
         for settings in settings_list:
-            settings['sourcefolder'] = self.ARGS.source
+            settings['sourcefolder_default'] = self.ARGS.source
             settings['override_date'] = self.ARGS.filter
             settings['dataroot'] = self.DATAROOT
             self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
@@ -124,17 +125,6 @@ class Main:
         parser.add_argument( "-d", "--destination", help="REQUIRED the external destinations (destinations should be separated by a colon)", required=True )
         parser.add_argument( "-f", "--filter", help="overrides the default date behavior or source filter)" )
         self.ARGS = parser.parse_args()
-
-
-    def _parse_items( self, items ):
-        items_dict = {}
-        if not items:
-            return {}
-        itemlist = items.split( ',' )
-        for item in itemlist:
-            item_parts = item.split(':')
-            items_dict[item_parts[0].strip()] = item_parts[1].strip()
-        return items_dict
 
 
     def _setPID( self ):

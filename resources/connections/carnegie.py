@@ -41,8 +41,8 @@ class Connection:
         defaults = parseSettings( config, settings )        
         self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
+        self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
         self.REMOTEPATH = settings.get( 'path' )
-        self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.PAYLOAD = { 'email': settings.get( 'user' ),
                          'password': settings.get( 'auth' ) }
         self.BASEURL = settings.get( 'host', config.Get( 'carnegie_baseURL' ) )
