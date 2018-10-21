@@ -75,7 +75,7 @@ class Main:
     def _filter_files( self, files, filters ):
         if not filters:
             return files
-        filter = self._parse_items( filters ).get( self.ARGS.source )
+        filter = _parse_items( filters ).get( self.ARGS.source )
         if not filter:
             lw.log( ['no filters needed for source ' + self.ARGS.source], 'info' )
             return files
@@ -144,7 +144,7 @@ class Main:
         tfiles = []
         if not transforms:
             return files
-        transform = self._parse_items( transforms ).get( self.ARGS.source )
+        transform = _parse_items( transforms ).get( self.ARGS.source )
         if not transform:
             lw.log( ['no transformation needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
             return files
@@ -159,7 +159,7 @@ class Main:
                 lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
                 return False
             tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
-            lw.log( loglines )
+            lw.log( loglines, 'info' )
             if tfile:
                 tpath = pathlib.PurePath( tfile )
                 tfiles.append( tpath.name )
