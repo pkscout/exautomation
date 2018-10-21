@@ -2,14 +2,10 @@ import csv, os, pathlib
 from ..common.fileops import readFile
 
 class Transform:
-    def __init__( self ):
-        pass
-
-
-    def Run( self, orgfile, destfile, config ):
+    def Run( self, orgfile, destfile, settings ):
         loglines = []
-        encoding = config.get( 'encoding', 'utf-8-sig' )
-        colspec = config.get( 'colspec' )
+        encoding = settings.get( 'encoding' )
+        colspec = settings.get( 'colspec' )
         if not colspec:
             return False, ['no column specifications provided, aborting']
         if encoding:
@@ -29,12 +25,12 @@ class Transform:
             destpath = pathlib.PurePath( destfile )
             destfile = os.path.join( destpath.parent, destpath.stem + '.csv' )
         with open( destfile, "w" ) as result:
-            if config.get( 'quoteall', True ):
+            if settings.get( 'quoteall', True ):
                 wtr = csv.writer( result, quoting=csv.QUOTE_ALL )
             else:
                 wtr = csv.writer( result )
-            if config.get( 'header' ):
-                wtr.writerow( config.get( 'header' ) )
+            if settings.get( 'header' ):
+                wtr.writerow( settings.get( 'header' ) )
             for row in data:
                 wtr.writerow( row )
         return destfile, loglines
