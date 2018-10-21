@@ -129,7 +129,29 @@ This connection module uses the College Board API to retrieve files.  The remain
 This connection module simulates a login to the Carnegie/Darlet member web site and then screen scrapes to get the file.  The remaining connection information is in `config.py`.  You can technically override those configs by adding the items from `config.py` to `settings.py`, but if any of those change the module will likely have to be updated anyway, as it means something major changed.
 
 ### Transform Modules
-**STILL NEED TO WRITE THIS**
+
+#### Fixed Width File to CSV (fixedtocsv)
+This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
+* **Required Settings**  
+`'colspec': <list of tuples>`  
+example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into three CSV columns with data from characters 1 - 3, 6 - 22, and the single character at 23)
+
+* **Optional Settings**  
+`'header': <list of strings>` (if no header is included, it's assumed you either don't need one for your destination)  
+example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
+`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
+
+#### Drop Columns (dropcolumns)
+This module drops an arbitrary list of columns from a CSV file before it is sent to the destination.
+
+* **Required Settings**  
+`'columns': <list of column numbers>`  
+example: `'columns': [1, 5, 22]`
+Column numbers can be all positive (left to right count) or all negative (right to left count).  You cannot mix positive and negative column numbering.  You can list the columns in any order you like.  The transform will sort them so that the columns are removed in the appropriate order.
+
+* **Optional Settings**  
+`'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the CSV.  Set to `False` to remove all quoting)  
+`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
 ## USAGE:
 `usage: execute.py [-h] -s SOURCE -d DESTINATION [-f STRING]`
@@ -164,13 +186,37 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
 You can write new connection and transform modules and place them in the appropriate subdirectory.  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put use in the settings file and command line.  The general naming convention for config settings is modulename_configname.  Connection modules must have one public class called Connection with the following public functions:
 
 ```python
-code samples go here
+from ..remotesites import parseSettings
+
+class Connection:
+    def __init__( self, config, settings ):
+        defaults = parseSettings( config, settings )        
+        self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
+        self.REMOTEFILTER = defaults.get( 'remotefilter' )
+        self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
+        # access all the options set in the source or destination section by using settings.get( 'name of setting' )
+        # access configuration items using config.Get( 'name of config item' )
+        # note that config is NOT a dictionary and has a special function called Get (capital G)
+
+
+    def Download( self ):
+        # whatever you're going to do to download files
+        return <list of files>, <list of log lines you'd like to add to the log>
+
+
+    def Upload( self, files ):
+        # whatever you're going to do to upload files
+        return <boolean indicating file outcome of upload>, <list of log lines you'd like to add to the log>
 ```
 
 Transform modules must have one public class named Transform with the following public functions:
 
 ```python
-code samples go here
+class Transform:
+    def Run( self, orgfile, destfile, settings ):
+        # whatever you're going to do to transform the file
+        # orgfile and destfile are full file paths and should not be changed
+        return destfile, <list of log lines you want to add to the log>
 ```
 
 If you would like to submit your modules to the github repo as a pull request, I can add review and add them so others can use them too.  If you decide to do that, please provide an appropriate license that is compatible with the license under which this code is released.
