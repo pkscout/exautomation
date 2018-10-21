@@ -1,22 +1,13 @@
 import json, os, sys
-from datetime import datetime, date, timedelta
+from ..remotesites import parseSettings
 from ..common.url import URL
 from ..common.fileops import writeFile
 
 class Connection:
     def __init__( self, config, settings ):
-        self.DATAROOT = settings.get( 'dataroot' )
-        if settings.get( 'override_date' ):
-            dateformat = config.Get( 'override_dateformat' )
-        else:
-            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
-        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
-        try:
-            self.FILTER = datetime.strptime( thedate, dateformat ).date()
-        except TypeError as e:
-            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
-        except ValueError as e:        
-            self.FILTER = thedate
+        defaults = parseSettings( config, settings )        
+        self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
+        self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.REMOTEPATH = settings.get( 'path' )
         self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.JSONURL = URL( 'json', {'Accept':'application/json', 'Content-Type': 'application/json'} )
@@ -36,9 +27,9 @@ class Connection:
         loglines = []
         url_params = {}
         dlist = []
-        if self.FILTER != 'all':
-            url_params['fromDate'] = self.FILTER
-            loglines.append( 'getting SAT files newer than ' + self.FILTER )
+        if self.REMOTEFILTER != 'all':
+            url_params['fromDate'] = self.REMOTEFILTER
+            loglines.append( 'getting SAT files newer than ' + self.REMOTEFILTER )
         else:
             loglines.append( 'getting all SAT files' )        
         success, uloglines, json_data = self.JSONURL.Post( self.LISTURL, params=url_params, data=self.PAYLOAD )
@@ -76,7 +67,7 @@ class Connection:
                     if self.DEBUG:
                         loglines.extend( uloglines )
                     loglines.append( 'saving file ' + file['fileName'] )
-                    success, wloglines = writeFile( urldata, os.path.join( self.DATAROOT, 'downloads', file['fileName'] ), writetype )
+                    success, wloglines = writeFile( urldata, os.path.join( self.LOCALDOWNLOADPATH, file['fileName'] ), writetype )
                     if self.DEBUG:
                         loglines.extend( wloglines )
                     dlist.append( file['fileName'] )

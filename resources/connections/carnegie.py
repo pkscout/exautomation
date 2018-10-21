@@ -1,5 +1,5 @@
 import os, requests, shutil
-from datetime import datetime, date, timedelta
+from ..remotesites import parseSettings
 from html.parser import HTMLParser
 
 class cparser( HTMLParser ):
@@ -9,7 +9,7 @@ class cparser( HTMLParser ):
         self.EXTRACTING = False
         self.TESTLINK = ''
         self.LATESTLINK = ''
-        self.FILTER = filedate
+        self.REMOTEFILTER = filedate
         
         
     def handle_starttag(self, tag, attrs):
@@ -24,7 +24,7 @@ class cparser( HTMLParser ):
 
     def handle_data( self, data ):
         if self.EXTRACTING:
-            name = 'PCU-%s.csv' % self.FILTER
+            name = 'PCU-%s.csv' % self.REMOTEFILTER
             if data == name:
                 self.LATESTLINK = self.TESTLINK
 
@@ -38,22 +38,13 @@ class cparser( HTMLParser ):
 
 class Connection:
     def __init__( self, config, settings ):
-        self.DATAROOT = settings.get( 'dataroot' )
-        if settings.get( 'override_date' ):
-            dateformat = config.Get( 'override_dateformat' )
-        else:
-            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
-        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
-        try:
-            self.FILTER = datetime.strptime( thedate, dateformat ).date()
-        except TypeError as e:
-            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
-        except ValueError as e:        
-            self.FILTER = thedate
+        defaults = parseSettings( config, settings )        
+        self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
+        self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.REMOTEPATH = settings.get( 'path' )
         self.SOURCEFOLDER = settings.get( 'sourcefolder' )
         self.PAYLOAD = { 'email': settings.get( 'user' ),
-                    'password': settings.get( 'auth' ) }
+                         'password': settings.get( 'auth' ) }
         self.BASEURL = settings.get( 'host', config.Get( 'carnegie_baseURL' ) )
         self.CONNURL =  self.BASEURL + settings.get( 'path', config.Get( 'carnegie_path' ) )
         self.DEBUG = config.Get( 'debug' )
@@ -64,12 +55,12 @@ class Connection:
         with requests.Session() as s:
             loglines.append( 'attempting to get file from Carnegie server' )
             p = s.post( self.CONNURL, data = self.PAYLOAD )
-            parser = cparser( self.FILTER )
+            parser = cparser( self.REMOTEFILTER )
             parser.feed( p.text )
             if parser.LATESTLINK:
                 loglines.append( 'getting ' + parser.LATESTLINK )
-                destfile = 'PCU-%s.csv' % self.FILTER
-                dest = os.path.join( self.DATAROOT, 'downloads', destfile)
+                destfile = 'PCU-%s.csv' % self.REMOTEFILTER
+                dest = os.path.join( self.LOCALDOWNLOADPATH, destfile)
                 rURL = self.BASEURL + parser.LATESTLINK + '?send=True'
                 r = s.get( rURL, stream=True )
                 if r.status_code == 200:

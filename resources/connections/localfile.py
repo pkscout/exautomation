@@ -1,21 +1,12 @@
 import os, re
-from datetime import datetime, date, timedelta
 from ..common.fileops import checkPath, copyFile
+from ..remotesites import parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
-        self.DATAROOT = settings.get( 'dataroot' )
-        if settings.get( 'override_date' ):
-            dateformat = config.Get( 'override_dateformat' )
-        else:
-            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
-        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
-        try:
-            self.FILTER = datetime.strptime( thedate, dateformat ).date()
-        except TypeError as e:
-            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
-        except ValueError as e:        
-            self.FILTER = thedate
+        defaults = parseSettings( config, settings )        
+        self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
+        self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.REMOTEPATH = settings.get( 'path' )
         self.SOURCEFOLDER = settings.get( 'sourcefolder' )
     
@@ -30,9 +21,9 @@ class Connection:
         except OSError as e:
             return False, ['unable to get directory listing for ' + self.REMOTEPATH, str( e )]
         for file in dirlist:
-            if re.search( self.FILTER, file ):
+            if re.search( self.REMOTEFILTER, file ):
                 srcpath = os.path.join( self.REMOTEPATH, file )
-                dstpath = os.path.join( self.DATAROOT, 'downloads', file )
+                dstpath = os.path.join( self.LOCALDOWNLOADPATH, file )
                 success, cloglines = copyFile( src=srcpath, dst=dstpath )
                 loglines.extend( cloglines )
                 if success:
@@ -46,7 +37,7 @@ class Connection:
         loglines = []
         overall_success = True
         for file in files:
-            srcpath = os.path.join( self.DATAROOT, 'downloads', file )
+            srcpath = os.path.join( self.LOCALDOWNLOADPATH, file )
             remotefolder = os.path.join( self.REMOTEPATH, self.SOURCEFOLDER )
             success, cloglines = checkPath( remotefolder )
             if not success:
@@ -59,5 +50,3 @@ class Connection:
         if not overall_success:
             loglines.append( ['one or more files was not copied'] )
         return overall_success, loglines
-        
-        

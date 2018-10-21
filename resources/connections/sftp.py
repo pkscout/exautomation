@@ -1,45 +1,30 @@
-import os
-from datetime import datetime, date, timedelta
-from ..remotesites import SFTP
+from ..remotesites import SFTP, parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
-        # NEED TO ABSTRACT ALL "DEFAULT" SETTINGS STUFF INTO A MODULE
-        self.DATAROOT = settings.get( 'dataroot' )
-        if settings.get( 'override_date' ):
-            dateformat = config.Get( 'override_dateformat' )
-        else:
-            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
-        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
-        try:
-            self.FILTER = datetime.strptime( thedate, dateformat ).date()
-        except TypeError as e:
-            self.FILTER = (date.today() - timedelta( 1 )).strftime( dateformat )
-        except ValueError as e:        
-            self.FILTER = thedate
+        defaults = parseSettings( config, settings )        
+        self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
+        self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.REMOTEPATH = settings.get( 'path' )
         self.SOURCEFOLDER = settings.get( 'sourcefolder' )
-        self.CONFIG = {}
-        self.CONFIG['debug'] = config.Get( 'debug' )     
-        self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
-        self.CONFIG['hostkey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_host.key' )
-        self.CONFIG['host'] = settings.get( 'host' )
-        self.CONFIG['privatekeypath'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_private.key' )
-        self.CONFIG['key_auth'] = settings.get( 'key_auth' )
-        self.CONFIG['username'] = settings.get( 'user' )
-        self.CONFIG['auth'] = settings.get( 'auth' )
-        self.CONFIG['port'] = settings.get( 'port', 22 )
-        self.CONFIG['timeout'] = settings.get( 'timeout', 15000 )
+        self.CONNECTCONFIG = {}
+        self.CONNECTCONFIG['debug'] = config.Get( 'debug' )     
+        self.CONNECTCONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
+        self.CONNECTCONFIG['hostkey'] = defaults.get( 'hostkey' )
+        self.CONNECTCONFIG['host'] = settings.get( 'host' )
+        self.CONNECTCONFIG['privatekey'] = defaults.get( 'privatekey' )
+        self.CONNECTCONFIG['key_auth'] = settings.get( 'key_auth' )
+        self.CONNECTCONFIG['username'] = settings.get( 'user' )
+        self.CONNECTCONFIG['auth'] = settings.get( 'auth' )
+        self.CONNECTCONFIG['port'] = settings.get( 'port', 22 )
+        self.CONNECTCONFIG['timeout'] = settings.get( 'timeout', 15000 )
     
     
     def Download( self ):
-        sftp = SFTP( self.CONFIG )
-        destination = os.path.join( self.DATAROOT, 'downloads' )
-        return sftp.Download( destination=destination, filter=self.FILTER, path=self.REMOTEPATH  )
+        sftp = SFTP( self.CONNECTCONFIG )
+        return sftp.Download( destination=self.LOCALDOWNLOADPATH, filter=self.REMOTEFILTER, path=self.REMOTEPATH  )
         
 
     def Upload( self, files ):
-        sftp = SFTP( self.CONFIG )
-        origin = os.path.join( self.DATAROOT, 'downloads' )
-        path = '/'.join( [self.REMOTEPATH, self.SOURCEFOLDER] )
-        return sftp.Upload( files=files, origin=origin, path=path )
+        sftp = SFTP( self.CONNECTCONFIG )
+        return sftp.Upload( files=files, origin=self.LOCALDOWNLOADPATH, path='/'.join( [self.REMOTEPATH, self.SOURCEFOLDER] ) )

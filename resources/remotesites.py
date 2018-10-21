@@ -1,7 +1,32 @@
 # v.0.1.0
     
-import chilkat, os, re
+import os, re
 from .common.fileops import readFile, writeFile
+from datetime import datetime, date, timedelta
+try:
+    chilkat_installed = True
+    import chilkat
+except ImportError:
+    chilkat_installed = False
+
+def parseSettings( config, settings ):
+        pconfig = {}
+        pconfig['localdownloadpath'] = os.path.join( settings.get( 'dataroot' ), 'downloads' )
+        pconfig['hostkey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_host.key' )
+        pconfig['privatekey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_private.key' )
+        if settings.get( 'override_date' ):
+            dateformat = config.Get( 'override_dateformat' )
+        else:
+            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
+        thedate = settings.get( 'override_date', settings.get( 'filter' ) )
+        try:
+            pconfig['remotefilter'] = datetime.strptime( thedate, dateformat ).date()
+        except TypeError as e:
+            pconfig['remotefilter'] = (date.today() - timedelta( 1 )).strftime( dateformat )
+        except ValueError as e:        
+            pconfig['remotefilter'] = thedate
+        return pconfig
+
 
 def checkHostkey( key, file ):
     loglines = []
@@ -21,9 +46,11 @@ class SFTP:
     
     
     def _connect( self ):
+        if not chilkat_installed:
+            return False, ['chilkat python module is not installed. Please see README.md for prequisite and install instructions.']
         loglines = []
         key = chilkat.CkSshKey()
-        privatekey = key.loadText( self.CONFIG.get( 'privatekeypath' ) )
+        privatekey = key.loadText( self.CONFIG.get( 'privatekey' ) )
         if key.get_LastMethodSuccess() == True:
             if self.CONFIG.get( 'key_auth' ):
                 key.put_Password( self.CONFIG.get( 'key_auth' ) );
@@ -146,6 +173,8 @@ class FTPS:
 
     
     def _connect( self ):
+        if not chilkat_installed:
+            return False, ['chilkat python module is not installed. Please see README.md for prequisite and install instructions.']
         loglines = []
         ftps = chilkat.CkFtp2()
         success = ftps.UnlockComponent( self.CONFIG.get( 'chilkat_license', 'Anything for 30 day trial' ) )
