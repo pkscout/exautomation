@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, date, timedelta
-from ..common.remotesites import FTPS
+from ..remotesites import FTPS
 
 class Connection:
     def __init__( self, config, settings ):

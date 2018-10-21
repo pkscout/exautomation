@@ -1,9 +1,10 @@
 import os
 from datetime import datetime, date, timedelta
-from ..common.remotesites import SFTP
+from ..remotesites import SFTP
 
 class Connection:
     def __init__( self, config, settings ):
+        # NEED TO ABSTRACT ALL "DEFAULT" SETTINGS STUFF INTO A MODULE
         self.DATAROOT = settings.get( 'dataroot' )
         if settings.get( 'override_date' ):
             dateformat = config.Get( 'override_dateformat' )

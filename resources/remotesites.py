@@ -1,9 +1,20 @@
 # v.0.1.0
     
 import chilkat, os, re
-from .fileops import readFile, writeFile
-from .hostkeys import CheckHostKey
+from .common.fileops import readFile, writeFile
+
+def checkHostkey( key, file ):
+    loglines = []
+    rloglines, saved_key = readFile( file )
+    loglines.extend( rloglines )
+    if not saved_key:
+        success, wloglines = writeFile( key, file, 'w' )
+        loglines.extend( wloglines )
+        saved_key = key
+    return saved_key == key, loglines
     
+
+   
 class SFTP:
     def __init__( self, config ):
         self.CONFIG = config
@@ -33,7 +44,7 @@ class SFTP:
         if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
-        success, cloglines = CheckHostKey( sftp.hostKeyFingerprint(), self.CONFIG.get( 'hostkey' ) )
+        success, cloglines = checkHostkey( sftp.hostKeyFingerprint(), self.CONFIG.get( 'hostkey' ) )
         if self.CONFIG.get( 'debug' ):
             loglines.extend( cloglines )
         if not success:
