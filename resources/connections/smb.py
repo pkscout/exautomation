@@ -14,11 +14,11 @@ class Connection:
         self.CONNECTCONFIG['user'] = settings.get( 'user' )
         self.CONNECTCONFIG['auth'] = settings.get( 'auth' )
         self.CONNECTCONFIG['clientname'] = settings.get( 'clientname' )
-        self.CONNECTCONFIG['domainname'] = settings.get( 'domainname', '' )
         self.CONNECTCONFIG['share'] = settings.get( 'share' )
+        self.CONNECTCONFIG['port'] = settings.get( 'port', 445 )
+        self.CONNECTCONFIG['domainname'] = settings.get( 'domainname', '' )
         self.CONNECTCONFIG['usentlmv2'] = settings.get( 'usentlmv2', True )
         self.CONNECTCONFIG['isdirectip'] = settings.get( 'usedirectip', True )
-        self.CONNECTCONFIG['port'] = settings.get( 'port', 445 )
     
     
     def Download( self ):
