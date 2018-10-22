@@ -14,6 +14,8 @@ defaults = { 'chilkat_license': 'Anything for 30-day trial',
              'sat_dateformat': '%Y-%m-%dT00:00:00',
            }
 
+import sys
+sys.path.append( '..' )
 try:
     import data.settings as overrides
     has_overrides = True

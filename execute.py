@@ -4,10 +4,10 @@
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, os, pathlib, random, re, sys, time
-import data.config as config
+import resources.config as config
 from resources.common.xlogger import Logger
 from resources.common.fileops import checkPath, deleteFile, renameFile, writeFile
-from resources.remotesites import _parse_items
+from resources.common.remotesites import _parse_items
 import resources.connections, resources.transforms
 if sys.version_info < (3, 0):
     from ConfigParser import *

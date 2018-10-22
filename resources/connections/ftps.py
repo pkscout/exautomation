@@ -1,4 +1,4 @@
-from ..remotesites import FTPS, parseSettings
+from ..common.remotesites import FTPS, parseSettings
 
 class Connection:
     def __init__( self, config, settings ):

@@ -1,7 +1,7 @@
 # v.0.1.0
     
 import os, re
-from .common.fileops import readFile, writeFile
+from .fileops import readFile, writeFile
 from datetime import datetime, date, timedelta
 try:
     smb_installed = True
@@ -304,8 +304,9 @@ class SMB:
         if not conn:
             return False, loglines
         conn.connect( self.SETTINGS.get( 'hostip' ), self.SETTINGS.get( 'port', 445 ) )
+        share = self.SETTINGS.get( 'share' )
         try:
-            dirlist = conn.listPath( self.SETTINGS.get( 'share' ), path )
+            dirlist = conn.listPath( share, path )
         except smb.smb_structs.OperationFailure as e:
             return False, ['unable to get directory listing for ' + path, str( e )]
         for file in dirlist:
@@ -313,9 +314,10 @@ class SMB:
                 success = True
                 srcpath = '/'.join( [path, file.filename] )
                 dstpath = os.path.join( destination, file.filename )
+                loglines.append( 'copying //%s/%s to %s' % (share, srcpath, dstpath) )
                 with open( dstpath, 'wb' ) as dfile:
                     try:
-                        conn.retrieveFile( self.SETTINGS.get( 'share' ), srcpath, dfile )
+                        conn.retrieveFile( share, srcpath, dfile )
                     except smb.smb_structs.OperationFailure as e:
                         success = False
                         loglines.extend( ['error reading file', str( e )] )
@@ -331,18 +333,19 @@ class SMB:
         if not conn:
             return False, loglines
         conn.connect( self.SETTINGS.get( 'hostip' ), self.SETTINGS.get( 'port', 445 ) )
+        share = self.SETTINGS.get( 'share' )
         fsuccess = True
         try:
-            conn.createDirectory( self.SETTINGS.get( 'share' ), path )
+            conn.createDirectory( share, path )
         except smb.smb_structs.OperationFailure:
             pass # this error happens if the directory already exists
         for file in files:        
-            loglines.append( 'transferring file ' + file )
             remotefilepath = '/'.join( [path, file] )
             localfilepath = os.path.join( origin, file )
+            loglines.append( 'copying %s to //%s/%s' % (localfilepath, share, remotefilepath) )
             with open( localfilepath, 'rb' ) as lfile:
                 try:
-                    conn.storeFile( self.SETTINGS.get( 'share' ), remotefilepath, lfile)
+                    conn.storeFile( share, remotefilepath, lfile)
                 except smb.smb_structs.OperationFailure as e:
                     fsuccess = False
                     loglines.extend( ['error writing file', str( e )] )

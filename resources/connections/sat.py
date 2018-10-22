@@ -1,5 +1,5 @@
 import json, os, sys
-from ..remotesites import parseSettings
+from ..common.remotesites import parseSettings
 from ..common.url import URL
 from ..common.fileops import writeFile
 

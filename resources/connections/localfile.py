@@ -1,6 +1,6 @@
 import os, re
 from ..common.fileops import checkPath, copyFile, osPathFromString
-from ..remotesites import parseSettings
+from ..common.remotesites import parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
