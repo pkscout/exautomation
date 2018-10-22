@@ -1,4 +1,5 @@
 v.1.0.1
+- added smb connection module
 - fix to convert string path in POSIX format to correct OS path
 
 v.1.0.0
