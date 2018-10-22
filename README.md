@@ -154,7 +154,7 @@ This module transforms a fixed width file into a CSV file.  The configuration di
 example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into three CSV columns with data from characters 1 - 3, 6 - 22, and the single character at 23)
 
 * **Optional Settings**  
-`'header': <list of strings>` (if no header is included, it's assumed you either don't need one for your destination)  
+`'header': <list of strings>` (if no header is included, it's assumed don't need one for your destination)  
 example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
