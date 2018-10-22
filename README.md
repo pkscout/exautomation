@@ -12,7 +12,7 @@ To install download and unzip in any directory.
 
 ## DIRECTORY STRUCTURE:
 ### data
-All configuration data is stored here.  When upgrading the only files in this directory that should be replaced are `__init__.py`, `config.py` and `settings-example.py`.  After the script is run once, it will add three other directories here:  `downloads` (for all downloaded files), `keys` (for any private keys you might need plus host keys saved when connecting via SFTP), and `logs` (for logfiles).
+All configuration data is stored here.  When upgrading the only files in this directory that should be replaced are `__init__.py` (which is an empty file) and `settings-example.py`.  After the script is run once, it will add three other directories here:  `downloads` (for all downloaded files), `keys` (for any private keys you might need plus host keys saved when connecting via SFTP), and `logs` (for logfiles).
 
 ### resources
 All shared libraries are stored here.  Unless you are building new modules, you should ever need to be in this directory, but if you do write new modules, they go in either connections or transforms.
@@ -26,19 +26,19 @@ The information is this section must exist exactly as it is in `settings-example
 ### General
   The script has a set of default settings that you can override in the settings file (using the format `<setting> = <value>`).This is the section where you can override any of those options.
 
-* `chilkat_license = <string>`  
+* `chilkat_license = '<string>'`  
 The sftp and ftps connection modules (more on modules in the **MODULES** section below) require a separately purchased and licensed module to work (see **PREREQUISITES** above).  Once you purchase the license you need to add the license key to the settings file.  If you don't enter a key, the script will activate a free 30 day trial the first time you run it.
 
-* `gmtoffet = <string>`  
+* `gmtoffet = '<string>'`  
 Set to your local offset in format -xxxx (i.e. -1000 or +0600).  Right now the SAT module is the only thing that uses this.  If you don't set this all times for the SAT module will be in Greenwich Mean Time.
 
 * `download_max = <integer>`  
 By default all downloaded and converted files are saved. To cap the size of the download directory, add this to set a max size for the download directory (in megabytes).
 
-* `override_dateformat = <string>`  
+* `override_dateformat = '<string>'`  
 When calling the script you can override the default date behavior (see **USAGE** below for more details).  This is the format expected when using that option.  The default is `%Y-%m-%d` (yyyy-mm-dd) but you can use any valid date format string you like to override this.
 
-* `dateformat = <string>`  
+* `dateformat = '<string>'`  
 All modules by default filter files to retrieve based on date, and this is the default date format if you don't put anything in your source configuration.  You can change the default behavior of `%Y-%m-%d` (yyyy-mm-dd) by adding this to the settings.
 
 * `aborttime = <integer>`  
