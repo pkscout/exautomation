@@ -4,12 +4,11 @@ Python command line tool to automate various file exchanges
 ## PREREQUISITES:
 * Python 3.x (tested with Python 3.7).  This almost certainly won't work with Python 2.7 (or earlier).  Please see <https://legacy.python.org/dev/peps/pep-0373/> for information on the sunset date for Python 2.7.
 * requests module (pip3 install requests)
+* pysmb module (pip3 install pysmb)
 * chilkat module (download/purchase from http://www.chilkatsoft.com/python.asp)
-
 
 ## INSTALLATION:
 To install download and unzip in any directory.
-
 
 ## DIRECTORY STRUCTURE:
 ### data
@@ -49,7 +48,7 @@ The time in seconds the script will wait for another instance of itself to finis
 By default the logs are rolled every day and seven days of logs are kept.  You can change the number of days of logs kept with this setting.
 
 * `debug = <boolean>`  
-If you're having problems, you can enable debug logging by adding `debug = True` to the settings.  This generates **lots** of information, so it isn't recommended to leave debugging enabled.  Please also note that certain connection modules will log the usernames and password in plaintext, so if you're going to share the logs for some reason make sure you scrub them first. 
+If you're having problems, you can enable debug logging by adding `debug = True` to the settings.  This generates **lots** of information, so it isn't recommended to leave debugging enabled.  **Please note that certain connection modules will log the usernames and password in plaintext.  Also, while in debug mode some modules may log PII for prospective students, so please be aware of that and understand your obligations under local, state, and federal laws/regulations as well as your institutional policies.  If you're going to share the logs for some reason make sure you scrub them first.**
 
 ### Sources
 This is the section where you define from where you'll be getting files.  Source configurations are stored as python dictionaries, so the format is important.  You are encouraged to use `settings-example.py` as a template for any new sources you add.  Sources must at a minimum have a name (all source names must be unique) and a type (more on the types in the **MODULES** section below) as well as some configuration options based on the type.  
@@ -111,6 +110,24 @@ You can technically use this module for an unsecured FTP connection by setting b
 * **Notes**  
 The directory path needs to be noted in POSIX format (i.e. `/this/is/the/path`) and start at the root directory for the file system.  For Windows include the drive letter as the first directory (i.e. `/C:/this/is/the/path`).
 You should be able to use this to access any file on any mounted drive (even if that mounted drive is a network share, although on Windows it will need to mapped to a drive letter).
+
+#### Windows Share (smb)
+* **Required Settings**  
+`'user': '<string>'` (account used to login)  
+`'auth': '<string>'` (password for login)  
+`'host': '<string>'` (Windows name of the server)  
+`'hostip': '<string>'` (IP address of the server)  
+`'clientname': '<string>'` (name of local client - can be basically anything under 16 characters)  
+`'share': '<string>'` (the name of the share to which you will connect)
+
+* **Optional Settings**  
+`'port': <integer>` (port of the server, default `445`)  
+`'domainname': '<string>'` (the name of the domain to which the server belongs)  
+`'usentlmv2': <boolean>` (whether or not to use NTLM v2, default `True`)  
+`'isdirectip': <boolean>` (whether to use Direct Hosting over TCP or NetBIOS, default `True`)  
+
+* **Notes**  
+The directory path needs to be noted in POSIX format (i.e. `this/is/the/path`) and references the path on the share to which you will be connecting.  Note that you **SHOULD NOT** include a forward slash at the beginning.
 
 #### SAT Score Retreiver (sat)
 * **Required Settings**  
