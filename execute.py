@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.1.0.1
+# *  v.1.1.1
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, os, pathlib, random, re, sys, time
@@ -94,6 +94,7 @@ class Main:
         for onedir in thedirs:
             exists, loglines = checkPath( os.path.join( self.DATAROOT, onedir, '' ) )
             lw.log( loglines )
+        settings = {}
         for source in config.Get( 'sources' ):
             if source['name'] == self.ARGS.source:
                 settings = source
@@ -102,9 +103,12 @@ class Main:
             settings['override_date'] = self.ARGS.filter
         settings['dataroot'] = self.DATAROOT
         try:
-            self.SOURCE = connection_modules[settings['type']].Connection( config, settings )
+            self.SOURCE = connection_modules.get( settings.get( 'type', 'NOTHING' ), 'NOTHING' ).Connection( config, settings )
         except UnboundLocalError as e:
             lw.log( ['no module matching %s found' % self.ARGS.source], 'info' )
+            return False
+        except AttributeError as e:
+            lw.log( ['it looks like you either have no data/settings.py folder or it is malformed', e], 'info' )
             return False
         settings_list = []
         for destination in config.Get( 'destinations' ):

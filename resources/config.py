@@ -12,6 +12,8 @@ defaults = { 'chilkat_license': 'Anything for 30-day trial',
              'sat_list_path': '/pascoredwnld/files/list',
              'sat_file_path': '/pascoredwnld/file',
              'sat_dateformat': '%Y-%m-%dT00:00:00',
+             'sources': [],
+             'destinations': []
            }
 
 import sys

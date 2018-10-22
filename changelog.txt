@@ -1,4 +1,7 @@
-v.1.0.1
+v.1.1.1
+- fix so script doesn't crash if settings.py is missing
+
+v.1.1.0
 - added smb connection module
 - fix to convert string path in POSIX format to correct OS path
 
