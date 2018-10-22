@@ -4,6 +4,12 @@ import os, re
 from .common.fileops import readFile, writeFile
 from datetime import datetime, date, timedelta
 try:
+    smb_installed = True
+    import smb
+    from smb.SMBConnection import SMBConnection
+except ImportError:
+    smb_installed = False
+try:
     chilkat_installed = True
     import chilkat
 except ImportError:
@@ -14,7 +20,8 @@ def parseSettings( config, settings ):
         pconfig['localdownloadpath'] = os.path.join( settings.get( 'dataroot' ), 'downloads' )
         pconfig['hostkey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_host.key' )
         pconfig['privatekey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_private.key' )
-        pconfig['sourcefolder'] = _parse_items( settings.get( 'sourcefolders' ) ).get( settings.get( 'sourcefolder_default' ), settings.get( 'sourcefolder_default' ) )
+        pconfig['sourcefolder'] = _parse_items( settings.get( 'sourcefolders' ) ).get( settings.get( 'sourcefolder_default' ),
+                                                settings.get( 'sourcefolder_default' ) )
         if settings.get( 'override_date' ):
             dateformat = config.Get( 'override_dateformat' )
         else:
@@ -52,8 +59,8 @@ def _parse_items( items ):
 
    
 class SFTP:
-    def __init__( self, config ):
-        self.CONFIG = config
+    def __init__( self, settings ):
+        self.SETTINGS = settings
     
     
     def _connect( self ):
@@ -61,45 +68,45 @@ class SFTP:
             return False, ['chilkat python module is not installed. Please see README.md for prequisite and install instructions.']
         loglines = []
         key = chilkat.CkSshKey()
-        privatekey = key.loadText( self.CONFIG.get( 'privatekey' ) )
+        privatekey = key.loadText( self.SETTINGS.get( 'privatekey' ) )
         if key.get_LastMethodSuccess() == True:
-            if self.CONFIG.get( 'key_auth' ):
-                key.put_Password( self.CONFIG.get( 'key_auth' ) );
+            if self.SETTINGS.get( 'key_auth' ):
+                key.put_Password( self.SETTINGS.get( 'key_auth' ) );
             success = key.FromOpenSshPrivateKey( privatekey )
             if not success:
                 key = None   
         else:
             key = None
-        loglines.append( 'connecting to %s server' % self.CONFIG.get( 'module_name', '' ) )
+        loglines.append( 'connecting to %s server' % self.SETTINGS.get( 'module_name', '' ) )
         sftp = chilkat.CkSFtp()
-        success = sftp.UnlockComponent( self.CONFIG.get( 'chilkat_license', 'Anything for 30 day trial' ) )
+        success = sftp.UnlockComponent( self.SETTINGS.get( 'chilkat_license', 'Anything for 30 day trial' ) )
         if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
-        sftp.put_ConnectTimeoutMs( self.CONFIG.get( 'timeout', 15000 ) )
-        sftp.put_IdleTimeoutMs( self.CONFIG.get( 'timeout', 15000 ) )
-        success = sftp.Connect( self.CONFIG.get( 'host' ), self.CONFIG.get( 'port', 22 ) )
+        sftp.put_ConnectTimeoutMs( self.SETTINGS.get( 'timeout', 15000 ) )
+        sftp.put_IdleTimeoutMs( self.SETTINGS.get( 'timeout', 15000 ) )
+        success = sftp.Connect( self.SETTINGS.get( 'host' ), self.SETTINGS.get( 'port', 22 ) )
         if not success:
             loglines.append( sftp.lastErrorText() )
             return False, loglines
-        success, cloglines = checkHostkey( sftp.hostKeyFingerprint(), self.CONFIG.get( 'hostkey' ) )
-        if self.CONFIG.get( 'debug' ):
+        success, cloglines = checkHostkey( sftp.hostKeyFingerprint(), self.SETTINGS.get( 'hostkey' ) )
+        if self.SETTINGS.get( 'debug' ):
             loglines.extend( cloglines )
         if not success:
-            loglines.append( 'WARNING: HOSTKEY FOR %s SERVER DOES NOT MATCH SAVED KEY. ABORTING.' % self.CONFIG.get( 'module_name', '' ).upper() )
+            loglines.append( 'WARNING: HOSTKEY FOR %s SERVER DOES NOT MATCH SAVED KEY. ABORTING.' % self.SETTINGS.get( 'module_name', '' ).upper() )
             return False, loglines
         if key:
             loglines.append( 'trying to authentication using private key' )
-            success = sftp.AuthenticatePk( self.CONFIG.get( 'username', '' ), key )
+            success = sftp.AuthenticatePk( self.SETTINGS.get( 'username', '' ), key )
         else:
             success = False
         if not success:
-            if key and self.CONFIG.get( 'debug' ):
+            if key and self.SETTINGS.get( 'debug' ):
                 loglines.append( sftp.lastErrorText() )
             elif key:
                 loglines.append( 'private key based authentication failed' )
             loglines.append( 'trying to authentication with username and password' )
-            success = sftp.AuthenticatePw( self.CONFIG.get( 'username', '' ), self.CONFIG.get( 'auth', '' ) )
+            success = sftp.AuthenticatePw( self.SETTINGS.get( 'username', '' ), self.SETTINGS.get( 'auth', '' ) )
             if not success:
                 loglines.append( sftp.lastErrorText() )
                 return False, loglines
@@ -135,7 +142,7 @@ class SFTP:
                     remotefile = '/'.join( [path, filename] )
                 else:
                     remotefile = filename
-                if self.CONFIG.get( 'debug' ):
+                if self.SETTINGS.get( 'debug' ):
                     loglines.append( 'checking file ' + filename )
                 if re.search( filter, filename ):
                     localfile = os.path.join( destination, filename )
@@ -145,10 +152,10 @@ class SFTP:
                         dlist.append( filename )
                     else:
                         loglines.append( 'unable to download %s to %s' % (remotefile, localfile) )
-                        if self.CONFIG.get( 'debug' ):
+                        if self.SETTINGS.get( 'debug' ):
                            loglines.append( sftp.lastErrorText() ) 
         success = sftp.CloseHandle( handle )
-        if not success and self.CONFIG.get( 'debug' ):
+        if not success and self.SETTINGS.get( 'debug' ):
             loglines.append( sftp.lastErrorText() )
         if not dlist:
             loglines.append( ['no files matching filter ' + filter] )
@@ -172,15 +179,15 @@ class SFTP:
                 fsuccess = False
         loglines.append( 'disconnecting from SFTP server' )
         success = sftp.Disconnect()
-        if not success and self.CONFIG.get( 'debug' ):
+        if not success and self.SETTINGS.get( 'debug' ):
             loglines.append( sftp.lastErrorText() )
         return fsuccess, loglines
 
 
 
 class FTPS:    
-    def __init__( self, config ):
-        self.CONFIG = config
+    def __init__( self, settings ):
+        self.SETTINGS = settings
 
     
     def _connect( self ):
@@ -188,18 +195,18 @@ class FTPS:
             return False, ['chilkat python module is not installed. Please see README.md for prequisite and install instructions.']
         loglines = []
         ftps = chilkat.CkFtp2()
-        success = ftps.UnlockComponent( self.CONFIG.get( 'chilkat_license', 'Anything for 30 day trial' ) )
+        success = ftps.UnlockComponent( self.SETTINGS.get( 'chilkat_license', 'Anything for 30 day trial' ) )
         if not success:
             loglines.append( ftps.lastErrorText() )
             return False, loglines
-        loglines.append( 'connecting to %s server' % self.CONFIG.get( 'module_name', '' ) )
-        ftps.put_Passive( self.CONFIG.get( 'passive', False ) )
-        ftps.put_Hostname( self.CONFIG.get( 'host' ) )
-        ftps.put_Username( self.CONFIG.get( 'username' ) )
-        ftps.put_Password( self.CONFIG.get( 'auth' ) )
-        ftps.put_Port( self.CONFIG.get( 'port', 990 ) )
-        ftps.put_AuthTls( self.CONFIG.get( 'authtls', True ) )
-        ftps.put_Ssl( self.CONFIG.get( 'ssl', False ) )
+        loglines.append( 'connecting to %s server' % self.SETTINGS.get( 'module_name', '' ) )
+        ftps.put_Passive( self.SETTINGS.get( 'passive', False ) )
+        ftps.put_Hostname( self.SETTINGS.get( 'host' ) )
+        ftps.put_Username( self.SETTINGS.get( 'username' ) )
+        ftps.put_Password( self.SETTINGS.get( 'auth' ) )
+        ftps.put_Port( self.SETTINGS.get( 'port', 990 ) )
+        ftps.put_AuthTls( self.SETTINGS.get( 'authtls', True ) )
+        ftps.put_Ssl( self.SETTINGS.get( 'ssl', False ) )
         success = ftps.Connect()
         if not success:
             loglines.append( ftps.lastErrorText() )
@@ -228,7 +235,7 @@ class FTPS:
         else:
             for i in range( 0, n ):
                 filename = ftps.getFilename( i )
-                if self.CONFIG.get( 'debug' ):
+                if self.SETTINGS.get( 'debug' ):
                     loglines.append( 'checking file ' + filename )
                 if re.search( filter, filename ):
                     localfile = os.path.join( destination, filename )
@@ -238,11 +245,10 @@ class FTPS:
                         dlist.append( filename )
                     else:
                         loglines.append( 'unable to download %s to %s' % (filename, localfile) )
-                        if self.CONFIG.get( 'debug' ):
+                        if self.SETTINGS.get( 'debug' ):
                            loglines.append( sftp.lastErrorText() ) 
-
         success = ftps.Disconnect()
-        if not success and self.CONFIG.get( 'debug' ):
+        if not success and self.SETTINGS.get( 'debug' ):
             loglines.append( sftp.lastErrorText() )
         return dlist, loglines
 
@@ -268,8 +274,82 @@ class FTPS:
                 fsuccess = False
         loglines.append( 'disconnecting from FTPS server' )
         success = ftps.Disconnect()
-        if not success and self.CONFIG.get( 'debug' ):
+        if not success and self.SETTINGS.get( 'debug' ):
             loglines.append( sftp.lastErrorText() )
         return fsuccess, loglines
 
+ 
+class SMB:
+    def __init__( self, settings ):
+        self.SETTINGS = settings
+
     
+    def _connect( self ):
+        if not smb_installed:
+            return False, ['pysmb python module is not installed. Please see README.md for prequisite and install instructions.']
+        try:
+            conn = SMBConnection( self.SETTINGS.get( 'user' ), self.SETTINGS.get( 'auth' ), self.SETTINGS.get( 'clientname' ),
+                                  self.SETTINGS.get( 'host' ), domain=self.SETTINGS.get( 'domainname', '' ),
+                                  use_ntlm_v2=self.SETTINGS.get( 'usentlmv2', True ), is_direct_tcp=self.SETTINGS.get( 'isdirecttcp', True ) )
+        except TypeError as e:
+            return False, ['error establishing smb connection', e]
+        return conn, ['smb connection established']
+    
+    
+    def Download( self, destination, filter='', path='' ):
+        loglines = []
+        dlist = []
+        conn, cloglines = self._connect()
+        loglines.extend( cloglines )
+        if not conn:
+            return False, loglines
+        conn.connect( self.SETTINGS.get( 'hostip' ), self.SETTINGS.get( 'port', 445 ) )
+        try:
+            dirlist = conn.listPath( self.SETTINGS.get( 'share' ), path )
+        except smb.smb_structs.OperationFailure as e:
+            return False, ['unable to get directory listing for ' + path, str( e )]
+        for file in dirlist:
+            if re.search( filter, file.filename ):
+                success = True
+                srcpath = '/'.join( [path, file.filename] )
+                dstpath = os.path.join( destination, file.filename )
+                with open( dstpath, 'wb' ) as dfile:
+                    try:
+                        conn.retrieveFile( self.SETTINGS.get( 'share' ), srcpath, dfile )
+                    except smb.smb_structs.OperationFailure as e:
+                        success = False
+                        loglines.extend( ['error reading file', str( e )] )
+                if success:
+                    dlist.append( file.filename )
+        return dlist, loglines
+                                     
+
+    def Upload( self, files, origin, path='' ):
+        loglines = []
+        conn, cloglines = self._connect()
+        loglines.extend( cloglines )
+        if not conn:
+            return False, loglines
+        conn.connect( self.SETTINGS.get( 'hostip' ), self.SETTINGS.get( 'port', 445 ) )
+        fsuccess = True
+        try:
+            conn.createDirectory( self.SETTINGS.get( 'share' ), path )
+        except smb.smb_structs.OperationFailure:
+            pass # this error happens if the directory already exists
+        for file in files:        
+            loglines.append( 'transferring file ' + file )
+            remotefilepath = '/'.join( [path, file] )
+            localfilepath = os.path.join( origin, file )
+            with open( localfilepath, 'rb' ) as lfile:
+                try:
+                    conn.storeFile( self.SETTINGS.get( 'share' ), remotefilepath, lfile)
+                except smb.smb_structs.OperationFailure as e:
+                    fsuccess = False
+                    loglines.extend( ['error writing file', str( e )] )
+        loglines.append( 'disconnecting from SMB server' )
+        conn.close()
+        return fsuccess, loglines
+                          
+                             
+                             
+                             
