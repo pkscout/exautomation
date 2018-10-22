@@ -1,3 +1,6 @@
+v.1.1.2
+- fix for retrograde error in ftps connection module
+
 v.1.1.1
 - fix so script doesn't crash if settings.py is missing
 
