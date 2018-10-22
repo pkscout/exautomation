@@ -203,7 +203,7 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
 You can write new connection and transform modules and place them in the appropriate subdirectory.  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put use in the settings file and command line.  The general naming convention for config settings is modulename_configname.  Connection modules must have one public class called Connection with the following public functions:
 
 ```python
-from ..remotesites import parseSettings
+from ..common.remotesites import parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
