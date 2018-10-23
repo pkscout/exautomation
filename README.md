@@ -211,6 +211,9 @@ class Connection:
         self.LOCALDOWNLOADPATH = defaults.get( 'localdownloadpath' )
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
+        # LOCALDOWNLOADPATH is the data/downloads directory (source for Upload and destination for Download)
+        # REMOTEFILTER is a string (either date, text or regular expression) you can use to filter your list of files in download
+        # SOURCEFOLDER is the name of the destination subdirectory for Upload
         # access all the options set in the source or destination section by using settings.get( 'name of setting' )
         # access configuration items using config.Get( 'name of config item' )
         # note that config is NOT a dictionary and has a special function called Get (capital G)
