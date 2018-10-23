@@ -22,17 +22,20 @@ def parseSettings( config, settings ):
         pconfig['privatekey'] = os.path.join( settings.get( 'dataroot' ), 'keys', settings.get( 'name' ) + '_private.key' )
         pconfig['sourcefolder'] = _parse_items( settings.get( 'sourcefolders' ) ).get( settings.get( 'sourcefolder_default' ),
                                                 settings.get( 'sourcefolder_default' ) )
+        override_dateformat = config.Get( 'override_dateformat' )
+        regular_dateformat = settings.get( 'dateformat', config.Get( 'dateformat' ) )
         if settings.get( 'override_date' ):
-            dateformat = config.Get( 'override_dateformat' )
+            dateformat = override_dateformat
         else:
-            dateformat = settings.get( 'dateformat', config.Get( 'override_dateformat' ) )
+            dateformat = regular_dateformat
         thedate = settings.get( 'override_date', settings.get( 'filter' ) )
         try:
-            pconfig['remotefilter'] = datetime.strptime( thedate, dateformat ).date()
+            pconfig['remotefilter'] = datetime.strptime( thedate, dateformat ).date().strftime( regular_dateformat )
         except TypeError as e:
             pconfig['remotefilter'] = (date.today() - timedelta( 1 )).strftime( dateformat )
         except ValueError as e:        
             pconfig['remotefilter'] = thedate
+        print( pconfig['remotefilter'] )
         return pconfig
 
 
