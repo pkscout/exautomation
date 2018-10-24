@@ -1,5 +1,6 @@
 v.1.2.0
 - ability to chain together transforms
+- added file rename transform module
 - SAT date format is no longer handled as a special case (read me updated)
 
 v.1.1.2

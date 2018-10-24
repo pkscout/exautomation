@@ -146,17 +146,6 @@ This connection module simulates a login to the Carnegie/Darlet member web site 
 
 ### Transform Modules 
 
-#### Fixed Width File to CSV (fixedtocsv)
-This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
-* **Required Settings**  
-`'colspec': <list of tuples>`  
-example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into three CSV columns with data from characters 1 - 3, 6 - 22, and the single character at 23)
-
-* **Optional Settings**  
-`'header': <list of strings>` (if no header is included, it's assumed don't need one for your destination)  
-example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
-`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
-
 #### Drop Columns (dropcolumns)
 This module drops an arbitrary list of columns from a CSV file before it is sent to the destination.
 
@@ -167,6 +156,24 @@ Column numbers can be all positive (left to right count) or all negative (right 
 
 * **Optional Settings**  
 `'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the CSV.  Set to `False` to remove all quoting)  
+`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
+
+#### File Rename (filerename)
+This module renames a file based on a pair of regular expressions (one for the search and the other the replace.)  Note that by putting `r` in front of the string you don't have to escape slash characters.
+
+* **Required Settings**  
+`'search':r'<string>` (regular expression search like `(.*).txt`)  
+`'replace':r'<string>'` (regular expression replace like `\1.csv`)
+
+#### Fixed Width File to CSV (fixedtocsv)
+This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
+* **Required Settings**  
+`'colspec': <list of tuples>`  
+example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into three CSV columns with data from characters 1 - 3, 6 - 22, and the single character at 23)
+
+* **Optional Settings**  
+`'header': <list of strings>` (if no header is included, it's assumed don't need one for your destination)  
+example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
 ## USAGE:
