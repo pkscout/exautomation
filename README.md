@@ -162,8 +162,13 @@ Column numbers can be all positive (left to right count) or all negative (right 
 This module renames a file based on a pair of regular expressions (one for the search and the other the replace.)  Note that by putting `r` in front of the string you don't have to escape slash characters.
 
 * **Required Settings**  
-`'search':r'<string>` (regular expression search like `(.*).txt`)  
+`'search':r'<string>'` (regular expression search like `(.*).txt`)  
 `'replace':r'<string>'` (regular expression replace like `\1.csv`)
+
+* **Optional Settings**
+`'appendstring': <boolean>` (Defaults to `False`, if set to `True` string below will be appended to end of file name
+`'string': <string>` (if this is omited with appendstring set to `True` it will insert today's date)
+`'dateformat': <string>` (any valid date format defaults to `%Y-%m-%d`)
 
 #### Fixed Width File to CSV (fixedtocsv)
 This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
