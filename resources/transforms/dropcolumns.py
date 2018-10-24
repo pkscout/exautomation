@@ -2,6 +2,7 @@ import csv
 
 class Transform:
     def Run( self, orgfile, destfile, settings ):
+        loglines = []
         columns = settings.get( 'columns' )
         encoding = settings.get( 'encoding' )
         if not columns:
@@ -21,9 +22,16 @@ class Transform:
                 wtr = csv.writer( result, quoting=csv.QUOTE_ALL )
             else:
                 wtr = csv.writer( result )
-            for row in data:
-                for column in columns:
-                    del row[column]
-                wtr.writerow( row )
+            try:
+                for row in data:
+                    for column in columns:
+                        try:
+                            del row[column]
+                        except IndexError as e:
+                            loglines.append( 'invalid column number %s, ignorning' % str( column ) )
+                    wtr.writerow( row )
+            except UnicodeDecodeError:
+                pass
         source.close()
-        return destfile, ['dropcolumns transform complete']
+        loglines.append( 'dropcolumns transform complete' )
+        return destfile, loglines
