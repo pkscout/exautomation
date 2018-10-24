@@ -154,7 +154,6 @@ class Main:
             lw.log( ['no transformations needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
             return files
         for transform in _parse_items( transforms, itemdelim=';', subitemdelim=None ):
-            print( transform )
             if tfiles:
                 usefiles = tfiles
                 tfiles = []
