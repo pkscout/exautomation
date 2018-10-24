@@ -35,7 +35,6 @@ def parseSettings( config, settings ):
             pconfig['remotefilter'] = (date.today() - timedelta( 1 )).strftime( dateformat )
         except ValueError as e:        
             pconfig['remotefilter'] = thedate
-        print( pconfig['remotefilter'] )
         return pconfig
 
 
@@ -50,15 +49,21 @@ def checkHostkey( key, file ):
     return saved_key == key, loglines
     
 
-def _parse_items( items ):
-    items_dict = {}
+def _parse_items( items, itemdelim = ',', subitemdelim = ':' ):
+    if subitemdelim:
+        items_group = {}
+    else:
+        items_group = []
     if not items:
-        return {}
-    itemlist = items.split( ',' )
+        return items_group
+    itemlist = items.split( itemdelim )
     for item in itemlist:
-        item_parts = item.split(':')
-        items_dict[item_parts[0].strip()] = item_parts[1].strip()
-    return items_dict
+        if subitemdelim:
+            item_parts = item.split( subitemdelim )
+            items_group[item_parts[0].strip()] = item_parts[1].strip()
+        else:
+            items_group.append( item.strip() )
+    return items_group
 
    
 class SFTP:

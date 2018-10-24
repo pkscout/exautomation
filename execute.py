@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.1.1.2
+# *  v.1.2.0
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, os, pathlib, random, re, sys, time
@@ -144,32 +144,46 @@ class Main:
 
 
     def _transform_files( self, files, destconfig ):
-        transforms = destconfig.get( 'transforms' )
+        transforms_list = destconfig.get( 'transforms' )
         tfiles = []
+        if not transforms_list:
+            lw.log( ['no transformations listed for destination ' + destconfig.get( 'name',  '')], 'info' )
+            return files
+        transforms = _parse_items( transforms_list ).get( self.ARGS.source )
         if not transforms:
+            lw.log( ['no transformations needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
             return files
-        transform = _parse_items( transforms ).get( self.ARGS.source )
-        if not transform:
-            lw.log( ['no transformation needed for %s when sending to %s' % (self.ARGS.source, destconfig.get( 'name',  ''))], 'info' )
-            return files
-        lw.log( ['transforming files using %s transform' % transform], 'info' )
-        for file in files:
-            destfile = os.path.join( self.DATAROOT, 'downloads', file )
-            orgfilename = '%s-org%s' % os.path.splitext( file )
-            orgfile = os.path.join( self.DATAROOT, 'downloads', orgfilename )
-            success, loglines = renameFile( destfile, orgfile )
-            lw.log( loglines )
-            if not success:
-                lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
-                return False
-            tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
-            lw.log( loglines, 'info' )
-            if tfile:
-                tpath = pathlib.PurePath( tfile )
-                tfiles.append( tpath.name )
+        for transform in _parse_items( transforms, itemdelim=';', subitemdelim=None ):
+            print( transform )
+            if tfiles:
+                usefiles = tfiles
+                tfiles = []
             else:
-                lw.log( ['error transforming file ' + file], 'info' )
-            return tfiles
+                usefiles = files
+            lw.log( ['transforming files using %s transform' % transform], 'info' )
+            for file in usefiles:
+                destfile = os.path.join( self.DATAROOT, 'downloads', file )
+                file_exists = True
+                i = 1
+                while file_exists:
+                    filepieces = os.path.splitext( file )
+                    orgfilename = '%s-org%s%s' % (filepieces[0], str( i ), filepieces[1])
+                    orgfile = os.path.join( self.DATAROOT, 'downloads', orgfilename )
+                    file_exists = os.path.isfile( orgfile )
+                    i = i + 1
+                success, loglines = renameFile( destfile, orgfile )
+                lw.log( loglines )
+                if not success:
+                    lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
+                    return False
+                tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
+                lw.log( loglines, 'info' )
+                if tfile:
+                    tpath = pathlib.PurePath( tfile )
+                    tfiles.append( tpath.name )
+                else:
+                    lw.log( ['error transforming file ' + file], 'info' )
+        return tfiles
 
 
     def _trim_downloads( self ):

@@ -29,9 +29,6 @@ The information is this section must exist exactly as it is in `settings-example
 * `chilkat_license = '<string>'`  
 The sftp and ftps connection modules (more on modules in the **MODULES** section below) require a separately purchased and licensed module to work (see **PREREQUISITES** above).  Once you purchase the license you need to add the license key to the settings file.  If you don't enter a key, the script will activate a free 30 day trial the first time you run it.
 
-* `gmtoffet = '<string>'`  
-Set to your local offset in format -xxxx (i.e. -1000 or +0600).  Right now the SAT module is the only thing that uses this.  If you don't set this all times for the SAT module will be in Greenwich Mean Time.
-
 * `download_max = <integer>`  
 By default all downloaded and converted files are saved. To cap the size of the download directory, add this to set a max size for the download directory (in megabytes).
 
@@ -60,11 +57,11 @@ This is the section where you define where you'll be sending files after they ar
 
 Destinations can filter a file list returned by a source and also transform a file if needed.  You set filters for a given source by using `'filters':'<source>: <string>, <source2>: <string>'`.  Filters can be plain text or regular expressions.  If a filename includes the plain text or matches the regular expression, then it will be passed on for further proccessing.  
 
-Destinations can also tranform a file before sending (see **MODULES** below for a list of available transforms).  You set transform modules for a given source by using `'transforms': '<source>: <module>, <source2>: <module2>'`.  Transforms can have configurations (based on the transform).  To configure a transform add `'<source>_<transform>_config': <config_dict>` where `<config_dict>` is a python dict (see `settings-example.py` for examples).  Note that the ACT transform in the Fireworks destination in `settings-example.py` actually converts the ACT fixed width to a CSV for Fireworks so you might want to keep that to use somewhere.  
+Destinations can also tranform a file before sending (see **MODULES** below for a list of available transforms).  You set transform modules for a given source by using `'transforms': '<source>: <module>, <source2>: <module2>'`.  Transforms can be chained together by using `<source>: <module>; <module2>; <module3>` (note the semi-colon for separating trasnform modules).  Tranforms will happen in the order listed.  Transforms can have configurations (based on the transform).  To configure a transform add `'<source>_<transform>_config': <config_dict>` where `<config_dict>` is a python dict (see `settings-example.py` for examples).  Note that the ACT transform in the Fireworks destination in `settings-example.py` actually converts the ACT fixed width to a CSV for Fireworks so you might want to keep that to use somewhere.  
 
 By default any destination that places files (currently they all do) will place files in a subdirectory matching the name of the source.  This is to ensure that duplicate files names across sources don't cause an issue.  You can override this by putting `'sourcefolders': '<source1>: <path>, <source2>: <path2>'` in the configuration dictionary for the destination.  The path will be relative to the path you set for the destination and must be appropriate for the destination (e.g. if it's a sftp source you would use `this/is/the/path`).  If a given source doesn't have an override path then the default sourcefolder path will be used.  If you put all files from all sources in the same directory you are on your own to deal with duplicate file names.  **This script will overwrite existing files with the same names as names it's planning to use.  You have been warned.**
 
-## MODULES
+## Modules
 There are two types of modules: connection modules and transform modules.  Many connection modules require authentication of some sort, and those are stored as plain text in settings.py as needed.  Yes, putting usernames and passwords in a text file is not secure, but since the script needs to read them unattended, there is technically no way to completely secure the passwords if someone has access to the machine on which this is running.  Future versions may add password encryption with a passphrase stored in the settings (still not secure, but perhaps it'll make someone feel better).
 
 ### Connection Modules
@@ -133,9 +130,11 @@ The directory path needs to be noted in POSIX format (i.e. `this/is/the/path`) a
 * **Required Settings**  
 `'user': '<string>'` (account used to login)  
 `'auth': '<string>'` (password for login)  
+`'dateformat': '%Y-%m-%dT00:00:00-<UTCOFFSET>'`  
 
 * **Notes**  
-This connection module uses the College Board API to retrieve files.  The remaining connection information is in `config.py`.  You can technically override those configs by adding the items from `config.py` to `settings.py`, but if any of those change the module will likely have to be updated anyway, as it means something major changed.
+This connection module uses the College Board API to retrieve files.  The remaining connection information is in `config.py`.  You can technically override those configs by adding the items from `config.py` to `settings.py`, but if any of those change the module will likely have to be updated anyway, as it means something major changed.  
+SAT has a very special required date format.  UTCOFFSET is your hours from Greenwich Mean Time.  For instance this would be -0500 for the eastern time zone of the US.
 
 #### Carnegie/Darlet Prospect Retreiver (carnegie)
 * **Required Settings**  
@@ -145,7 +144,7 @@ This connection module uses the College Board API to retrieve files.  The remain
 * **Notes**  
 This connection module simulates a login to the Carnegie/Darlet member web site and then screen scrapes to get the file.  The remaining connection information is in `config.py`.  You can technically override those configs by adding the items from `config.py` to `settings.py`, but if any of those change the module will likely have to be updated anyway, as it means something major changed.
 
-### Transform Modules
+### Transform Modules 
 
 #### Fixed Width File to CSV (fixedtocsv)
 This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
