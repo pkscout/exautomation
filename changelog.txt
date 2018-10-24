@@ -1,7 +1,9 @@
 v.1.2.0
 - ability to chain together transforms
 - added file rename transform module
-- SAT date format is no longer handled as a special case (read me updated)
+- added trimchoicelist transform module
+- fixes to handle random UTF8 characters at the end of files without crashing
+- SAT date format is no longer handled as a special case
 
 v.1.1.2
 - fix for regression error in ftps connection module
