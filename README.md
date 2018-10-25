@@ -150,13 +150,14 @@ This connection module simulates a login to the Carnegie/Darlet member web site 
 This module drops an arbitrary list of columns from a CSV file before it is sent to the destination.
 
 * **Required Settings**  
-`'columns': <list of column numbers>`  
-example: `'columns': [1, 5, 22]`
-Column numbers can be all positive (left to right count) or all negative (right to left count).  You cannot mix positive and negative column numbering.  You can list the columns in any order you like.  The transform will sort them so that the columns are removed in the appropriate order.
+`'columns': <list of column numbers>` (example: `'columns': [1, 5, 22]`)  
 
 * **Optional Settings**  
 `'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the CSV.  Set to `False` to remove all quoting)  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
+
+* **Notes**  
+Column numbers can be all positive (left to right count) or all negative (right to left count).  You cannot mix positive and negative column numbering.  You can list the columns in any order you like.  The transform will sort them so that the columns are removed in the appropriate order.
 
 #### File Rename (filerename)
 This module renames a file based on a pair of regular expressions (one for the search and the other the replace.)  Note that by putting `r` in front of the string you don't have to escape slash characters.
@@ -166,8 +167,8 @@ This module renames a file based on a pair of regular expressions (one for the s
 `'replace':r'<string>'` (regular expression replace like `\1.csv`)
 
 * **Optional Settings**
-`'appendstring': <boolean>` (Defaults to `False`, if set to `True` string below will be appended to end of file name
-`'string': <string>` (if this is omited with appendstring set to `True` it will insert today's date)
+`'appendstring': <boolean>` (Defaults to `False`, if set to `True` string below will be appended to end of file name  
+`'string': <string>` (if this is omited with appendstring set to `True` it will insert today's date)  
 `'dateformat': <string>` (any valid date format defaults to `%Y-%m-%d`)
 
 #### Fixed Width File to CSV (fixedtocsv)
@@ -180,6 +181,20 @@ example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into t
 `'header': <list of strings>` (if no header is included, it's assumed don't need one for your destination)  
 example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
+
+#### Trim Choice List (trimchoicelist)
+This module allows you to take a choice list field from a CSV file (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.
+
+* **Required Settings**  
+`'column': <integer>` (the column where the choice list answers lives - first column is column 1)  
+
+* **Optional Settings**  
+`'priority':<list of strings>` (all the possible choices listed in the order you want them considered)  
+`'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the saved CSV.  Set to `False` to remove all quoting)  
+`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
+
+* **Notes**  
+If you don't include a priority list, the first choice in the list is taken and the rest are ignored.  If no item in a choice list matches any of the priorities, the entire original field is maintained for that row.
 
 ## USAGE:
 `usage: execute.py [-h] -s SOURCE -d DESTINATION [-f STRING]`
