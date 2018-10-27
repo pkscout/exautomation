@@ -99,13 +99,16 @@ class Main:
             if source['name'] == self.ARGS.source:
                 settings = source
                 break
+        if not settings:
+            lw.log( ['no matching source for ' + self.AGRGS.source], 'info' )
+            return False
         if self.ARGS.filter:
             settings['override_date'] = self.ARGS.filter
         settings['dataroot'] = self.DATAROOT
         try:
             self.SOURCE = connection_modules.get( settings.get( 'type', 'NOTHING' ), 'NOTHING' ).Connection( config, settings )
         except UnboundLocalError as e:
-            lw.log( ['no module matching %s found' % self.ARGS.source], 'info' )
+            lw.log( ['no %s type module for source %s found' % (settings.get( 'type' ), self.ARGS.source)], 'info' )
             return False
         except AttributeError as e:
             lw.log( ['it looks like you either have no data/settings.py folder or it is malformed', e], 'info' )
