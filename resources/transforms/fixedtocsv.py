@@ -2,7 +2,7 @@ import csv, os, pathlib
 from ..common.fileops import readFile
 
 class Transform:
-    def Run( self, orgfile, destfile, settings ):
+    def Run( self, orgfile, destfile, settings, debug ):
         loglines = []
         encoding = settings.get( 'encoding' )
         colspec = settings.get( 'colspec' )

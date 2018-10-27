@@ -175,7 +175,7 @@ class Main:
                 if not success:
                     lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
                     return False
-                tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ) )
+                tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ), config.Get( 'debug' ) )
                 lw.log( loglines, 'info' )
                 if tfile:
                     tpath = pathlib.PurePath( tfile )

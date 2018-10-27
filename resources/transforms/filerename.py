@@ -3,7 +3,7 @@ from datetime import date
 from ..common.fileops import copyFile
 
 class Transform:
-    def Run( self, orgfile, destfile, settings ):
+    def Run( self, orgfile, destfile, settings, config, debug ):
         loglines = []
         if not settings.get( 'search' ) or not settings.get( 'replace' ):
             return False, ['search or replace settings not included, aborting transform.']
