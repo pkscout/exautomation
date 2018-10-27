@@ -150,7 +150,7 @@ This connection module simulates a login to the Carnegie/Darlet member web site 
 This module drops an arbitrary list of columns from a CSV file before it is sent to the destination.
 
 * **Required Settings**  
-`'columns': <list of column numbers>` (example: `'columns': [1, 5, 22]`)  
+`'columns': <list of column numbers>` (example: `'columns': [1, 5, 22]`) - first column is column 0  
 
 * **Optional Settings**  
 `'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the CSV.  Set to `False` to remove all quoting)  
@@ -186,7 +186,7 @@ example: `'header': ['First Name', 'Last Name', 'Opt Out']`
 This module allows you to take a choice list field from a CSV file (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.
 
 * **Required Settings**  
-`'column': <integer>` (the column where the choice list answers lives - first column is column 1)  
+`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
 
 * **Optional Settings**  
 `'priority':<list of strings>` (all the possible choices listed in the order you want them considered)  

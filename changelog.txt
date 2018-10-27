@@ -1,9 +1,12 @@
 v.1.2.0
 - ability to chain together transforms
 - added file rename transform module
-- added trimchoicelist transform module
+- added field change transform module (which itself has modules)
+- initial field change modules are drop column, replace, and trim choice list
+- removed old drop column transform module (merged into field change transform)
+- added debug logging to all transform modules
 - fixes to handle random UTF8 characters at the end of files without crashing
-- SAT date format is no longer handled as a special case
+- SAT date format is no longer handled as a special case (i.e. it needs to be in the config for your SAT source)
 
 v.1.1.2
 - fix for regression error in ftps connection module
