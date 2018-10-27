@@ -7,7 +7,7 @@ def Transform( oldfield, transform, debug ):
             newfield = priority
             break
     if newfield == oldfield:
-        newfield = oldfield.split( settings.get( 'delimiter', ',' ) )[0].strip()
+        newfield = oldfield.split( transform.get( 'delimiter', ',' ) )[0].strip()
     if debug:
         loglines.extend( ['the priority list is:', priority_list] )
         loglines.append( 'selected "%s" from "%s"' % (newfield, oldfield) )
