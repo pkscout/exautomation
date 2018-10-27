@@ -1,5 +1,4 @@
 defaults = { 'chilkat_license': 'Anything for 30-day trial',
-             'gmtoffset': '',
              'download_max': 0,
              'override_dateformat': '%Y-%m-%d',
              'dateformat': '%Y-%m-%d',
@@ -11,12 +10,8 @@ defaults = { 'chilkat_license': 'Anything for 30-day trial',
              'sat_baseURL': 'https://scoresdownload.collegeboard.org',
              'sat_list_path': '/pascoredwnld/files/list',
              'sat_file_path': '/pascoredwnld/file',
-             'sources': [],
-             'destinations': []
            }
 
-import sys
-sys.path.append( '..' )
 try:
     import data.settings as overrides
     has_overrides = True
