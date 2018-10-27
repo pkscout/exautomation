@@ -11,27 +11,23 @@ for module in resources.transforms.fieldtransforms.__all__:
 class Transform:
     def Run( self, orgfile, destfile, settings, debug ):
         loglines = []
-        if not settings.get( 'transforms' ):
-            return False, ['no transforms provided for field transforms']
-        columns = settings.get( 'columns' )
-        if not columns:
-            return False, ['no column list provided for field transforms']
-        positives = all( i >= 0 for i in columns )
-        negatives = all( i < 0 for i in columns )
-        if not ( positives or negatives):
-            return False, ['column list for field transforms must be all positive or all negative numbers']
-        columns.sort( reverse = True )
+        transforms = settings.get( 'transforms' )
+        if not transforms:
+            return False, ['no transforms provided for field transforms module']
+        tcolumns = []
+        for transform in transforms:
+            tcolumn = transform.get( 'column' )
+            if tcolumn == None:
+                return False, ['column information not included in transform setting']
+            else:
+                tcolumns.append( tcolumn )
         encoding = settings.get( 'encoding' )
-        if len( settings.get( 'transforms' ) ) == 1:
-            transforms = []
-            for column in columns:
-                transforms.append( settings.get( 'transforms' )[0] )
-        else:
-            transforms = settings.get( 'transforms' )
         if encoding:
             source = open( orgfile, "r", newline='', encoding=encoding )
         else:
             source = open( orgfile, "r", newline='' )
+        if debug:
+            loglines.extend( ['column list is:', tcolumns, 'transform list is:', transforms] )
         data = csv.reader( source )
         with open( destfile, "w", newline='' ) as result:
             if settings.get( 'quoteall', True ):
@@ -40,23 +36,21 @@ class Transform:
                 wtr = csv.writer( result )
             try:
                 for row in data:
-                    if debug:
-                        loglines.extend( ['reading row',row] )
-                    for column, transform in zip( columns, transforms ):
-                        try:
-                            oldfield = row[column]
-                            do_transform = True
-                        except IndexError as e:
-                            do_tranform = False
-                            loglines.append( 'invalid column number %s, ignorning' % str( column ) )
-                        if do_transform:
-                            new_field, tloglines = field_modules[transform.get( 'name' )].Transform( oldfield, transform, debug )
+                    newrow = []
+                    for i in range(0, len( row )):
+                        oldfield = row[i]
+                        if i in tcolumns:
+                            for check_transform in transforms:
+                                if check_transform.get( 'column' ) == i:
+                                    transform = check_transform
+                                    break
+                            newfield, tloglines = field_modules[transform.get( 'name' )].Transform( oldfield, transform, debug )
                             loglines.extend( tloglines )
-                            if new_field:
-                                row[column] = new_field
-                    wtr.writerow( row )
-                    if debug:
-                        loglines.extend( ['writing row',row] )
+                            if not newfield is None:
+                                newrow.append( newfield )                          
+                        else:
+                            newrow.append( oldfield )
+                    wtr.writerow( newrow )
             except UnicodeDecodeError:
                 source.close()
                 return False, ['field transforms failed while reading file ' + destfile, str( e )]
