@@ -62,7 +62,7 @@ Destinations can also tranform a file before sending (see **MODULES** below for 
 By default any destination that places files (currently they all do) will place files in a subdirectory matching the name of the source.  This is to ensure that duplicate files names across sources don't cause an issue.  You can override this by putting `'sourcefolders': '<source1>: <path>, <source2>: <path2>'` in the configuration dictionary for the destination.  The path will be relative to the path you set for the destination and must be appropriate for the destination (e.g. if it's a sftp source you would use `this/is/the/path`).  If a given source doesn't have an override path then the default sourcefolder path will be used.  If you put all files from all sources in the same directory you are on your own to deal with duplicate file names.  **This script will overwrite existing files with the same names as names it's planning to use.  You have been warned.**
 
 ## Modules
-There are two types of modules: connection modules and transform modules.  Many connection modules require authentication of some sort, and those are stored as plain text in settings.py as needed.  Yes, putting usernames and passwords in a text file is not secure, but since the script needs to read them unattended, there is technically no way to completely secure the passwords if someone has access to the machine on which this is running.  Future versions may add password encryption with a passphrase stored in the settings (still not secure, but perhaps it'll make someone feel better).
+There are three types of modules: connection modules, transform modules, and field transform modules (which are used by the changefields module).  Many connection modules require authentication of some sort, and those are stored as plain text in settings.py as needed.  Yes, putting usernames and passwords in a text file is not secure, but since the script needs to read them unattended, there is technically no way to completely secure the passwords if someone has access to the machine on which this is running.  Future versions may address this, but please don't hold your breath waiting.
 
 ### Connection Modules
 
@@ -146,22 +146,8 @@ This connection module simulates a login to the Carnegie/Darlet member web site 
 
 ### Transform Modules 
 
-#### Drop Columns (dropcolumns)
-This module drops an arbitrary list of columns from a CSV file before it is sent to the destination.
-
-* **Required Settings**  
-`'columns': <list of column numbers>` (example: `'columns': [1, 5, 22]`) - first column is column 0  
-
-* **Optional Settings**  
-`'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the CSV.  Set to `False` to remove all quoting)  
-`'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
-
-* **Notes**  
-Column numbers can be all positive (left to right count) or all negative (right to left count).  You cannot mix positive and negative column numbering.  You can list the columns in any order you like.  The transform will sort them so that the columns are removed in the appropriate order.
-
 #### File Rename (filerename)
-This module renames a file based on a pair of regular expressions (one for the search and the other the replace.)  Note that by putting `r` in front of the string you don't have to escape slash characters.
-
+This module renames a file based on a pair of regular expressions (one for the search and the other the replace.)
 * **Required Settings**  
 `'search':r'<string>'` (regular expression search like `(.*).txt`)  
 `'replace':r'<string>'` (regular expression replace like `\1.csv`)
@@ -169,7 +155,11 @@ This module renames a file based on a pair of regular expressions (one for the s
 * **Optional Settings**
 `'appendstring': <boolean>` (Defaults to `False`, if set to `True` string below will be appended to end of file name  
 `'string': <string>` (if this is omited with appendstring set to `True` it will insert today's date)  
-`'dateformat': <string>` (any valid date format defaults to `%Y-%m-%d`)
+`'dateformat': <string>` (if inserting date, formats the date using any valid date format and defaults to `%Y-%m-%d`)
+
+* **Notes**  
+By putting `r` in front of the string for the search and replace sections you don't have to escape slash characters.
+
 
 #### Fixed Width File to CSV (fixedtocsv)
 This module transforms a fixed width file into a CSV file.  The configuration dictionary for this transforms takes three settings:
@@ -182,19 +172,56 @@ example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into t
 example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
-#### Trim Choice List (trimchoicelist)
-This module allows you to take a choice list field from a CSV file (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.
+#### Transform Field (changefields)
+This module has a bunch of sub modules (described below) that allow you to do various things to a field of data (like do a regular expression search and replace, trim a pick list to one entry, and even drop the entire column).  The configuration for this transform is a bit tricky, so definitely look at the example in settings-example.py for some guidance.
 
 * **Required Settings**  
-`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'transforms': <list of dictionaries>` (see **FIELD TRANFORMS** below for details on dictionaries for specific field transforms)
 
 * **Optional Settings**  
-`'priority':<list of strings>` (all the possible choices listed in the order you want them considered)  
 `'quoteall': <boolean>` (Defaults to `True` and ensures all data is quoted in the saved CSV.  Set to `False` to remove all quoting)  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
 * **Notes**  
-If you don't include a priority list, the first choice in the list is taken and the rest are ignored.  If no item in a choice list matches any of the priorities, the entire original field is maintained for that row.
+You can use a field transform more than once in a row simply by adding another item to the list with the appropriate column reference.  Field transforms are all done on CSV files.  You must convert your file to CSV before using this transform.
+
+### Field Transform Modules
+
+#### Drop Column (dropcolumn)
+This module drops the given column from the file completely.
+
+* **Required Settings**  
+`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'name': 'dropcolumn'`
+
+#### Replace Text (replace)
+This module does a search based on a regular expression then the corresponding replace with another regular expression.
+
+* **Required Setting**  
+`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'name': 'replace'`  
+`'search': r'<regular expression>'` (the regular expression that will define the search criteria)  
+`'replace': r'<regular expression>'` (the regular expression that defines the replace)
+
+* **Optional Settings**  
+`'default': '<string>'` (If the field is empty, put this default value in the field instead)
+
+* **Notes**  
+If your `search` don't find anything, the entire original field will be returned.  
+By putting `r` in front of the string for the search and replace sections you don't have to escape slash characters.
+
+#### Trim Choice List (trimchoicelist)
+This module allows you to take a choice list field  (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.
+
+* **Required Settings**  
+`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'name': 'trimchoicelist'`
+
+* **Optional Settings**  
+`'priority':<list of strings>` (all the possible choices listed in the order you want them considered)  
+
+* **Notes**  
+If you don't include a priority list, the first choice in the list is taken and the rest are ignored.  If no item in a choice list matches any of the priorities, the entire original field is maintained for that field.
 
 ## USAGE:
 `usage: execute.py [-h] -s SOURCE -d DESTINATION [-f STRING]`
@@ -226,7 +253,7 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
 
 ## WRITING NEW MODULES:
 
-You can write new connection and transform modules and place them in the appropriate subdirectory.  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put use in the settings file and command line.  The general naming convention for config settings is modulename_configname.  Connection modules must have one public class called Connection with the following public functions:
+You can write new connection, transform, and field transform modules and place them in the appropriate subdirectory of the resources directory (note: field transforms go in transforms/field transforms).  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put use in the settings file and command line.  Connection modules must have one public class called Connection with the following public functions:
 
 ```python
 from ..common.remotesites import parseSettings
@@ -259,10 +286,21 @@ Transform modules must have one public class named Transform with the following 
 
 ```python
 class Transform:
-    def Run( self, orgfile, destfile, settings ):
+    def Run( self, orgfile, destfile, settings, debug ):
         # whatever you're going to do to transform the file
         # orgfile and destfile are full file paths and should not be changed
+        # debug is True if debugging is set in settings, so this lets you return more detailed loglines if you wish
         return destfile, <list of log lines you want to add to the log>
+```
+
+Field Transform modules must have one public function as follows:
+
+```python
+def Transform( oldfield, transform, debug ):
+    # whatever you're going to do to transform the field
+    # all settings for the tranform can be referenced using transform.get( 'name' )
+    # debug is True if debugging is set in settings, so this lets you return more detailed loglines if you wish
+    return <string that is the transformed field>, <list of log lines you want to add to the log>
 ```
 
 If you would like to submit your modules to the github repo as a pull request, I can add review and add them so others can use them too.  If you decide to do that, please provide an appropriate license that is compatible with the license under which this code is released.
