@@ -245,7 +245,7 @@ Obviously an automation tool isn't much use if you can't schedule it.  How you d
 
 Program/script: `"C:\Program Files\Python 3.7\pythonw.exe"`  
 Add arguments: `"C:\CustomApps\exautomation\execute.py -s SAT -d Fireworks"`  
-Start in: `C:\CustomApps\exautomation\`
+Start in: `"C:\CustomApps\exautomation\"`
 
 On most Unix variants, you'll use crontab.  The line you add to your crontab might look like:
 
