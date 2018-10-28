@@ -257,7 +257,7 @@ On most Unix variants, you'll use crontab.  The line you add to your crontab mig
 You can write new connection, transform, and field transform modules and place them in the appropriate subdirectory of the resources directory (note: field transforms go in transforms/field transforms).  You may name them whatever you like, and the name of the file (minus the .py) becomes what you put use in the settings file and command line.  Connection modules must have one public class called Connection with the following public functions:
 
 ```python
-from ..common.remotesites import parseSettings
+from resources.common.remotesites import parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
