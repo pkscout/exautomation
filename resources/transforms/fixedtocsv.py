@@ -1,5 +1,5 @@
 import csv, os, pathlib
-from ..common.fileops import readFile
+from resources.common.fileops import readFile
 
 class Transform:
     def Run( self, orgfile, destfile, settings, debug ):

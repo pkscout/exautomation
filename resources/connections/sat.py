@@ -1,7 +1,7 @@
 import json, os, sys
-from ..common.remotesites import parseSettings
-from ..common.url import URL
-from ..common.fileops import writeFile
+from resources.common.remotesites import parseSettings
+from resources.common.url import URL
+from resources.common.fileops import writeFile
 
 class Connection:
     def __init__( self, config, settings ):

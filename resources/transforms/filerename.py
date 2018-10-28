@@ -1,6 +1,6 @@
 import os, re, pathlib
 from datetime import date
-from ..common.fileops import copyFile
+from resources.common.fileops import copyFile
 
 class Transform:
     def Run( self, orgfile, destfile, settings, debug ):

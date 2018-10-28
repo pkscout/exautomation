@@ -1,5 +1,5 @@
 import os, requests, shutil
-from ..common.remotesites import parseSettings
+from resources.common.remotesites import parseSettings
 from html.parser import HTMLParser
 
 class cparser( HTMLParser ):

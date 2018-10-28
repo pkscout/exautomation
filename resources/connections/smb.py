@@ -1,4 +1,4 @@
-from ..common.remotesites import SMB, parseSettings
+from resources.common.remotesites import SMB, parseSettings
 
 class Connection:
     def __init__( self, config, settings ):

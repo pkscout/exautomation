@@ -1,4 +1,4 @@
-from ..common.remotesites import SFTP, parseSettings
+from resources.common.remotesites import SFTP, parseSettings
 
 class Connection:
     def __init__( self, config, settings ):
