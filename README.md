@@ -243,8 +243,8 @@ show the help message and exits
 ## SCHEDULING TASKS:
 Obviously an automation tool isn't much use if you can't schedule it.  How you do that is going to be a bit dependent on platform, but generally you will need to call your Python interpreter and then provide the full path to execute.py with valid command line options.  Note that since the script can only do one source at a time, you'll need to schedule different jobs for each different source (or write your own wrapper script to loop through them if you want to).  On Windows you're probably going to use Task Scheduler, and after creating a new task to run daily at a certain time, that might look like:
 
-`Program/script: "C:\Program Files\Python 3.7\pythonw.exe"`  
-`Add arguments: "C:\CustomApps\exautomation\execute.py -s SAT -d Fireworks"`
+Program/script: `"C:\Program Files\Python 3.7\pythonw.exe"`  
+Add arguments: `"C:\CustomApps\exautomation\execute.py -s SAT -d Fireworks"`
 
 On most Unix variants, you'll use crontab.  The line you add to your crontab might look like:
 
