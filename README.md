@@ -48,16 +48,16 @@ By default the logs are rolled every day and seven days of logs are kept.  You c
 If you're having problems, you can enable debug logging by adding `debug = True` to the settings.  This generates **lots** of information, so it isn't recommended to leave debugging enabled.  **Please note that certain connection modules will log the usernames and password in plaintext.  Also, while in debug mode some modules may log PII for prospective students, so please be aware of that and understand your obligations under local, state, and federal laws/regulations as well as your institutional policies.  If you're going to share the logs for some reason make sure you scrub them first.**
 
 ### Sources
-This is the section where you define from where you'll be getting files.  Source configurations are stored as python dictionaries, so the format is important.  You are encouraged to use `settings-example.py` as a template for any new sources you add.  Sources must at a minimum have a name (all source names must be unique) and a type (more on the types in the **MODULES** section below) as well as some configuration options based on the type.  
+This is the section where you define from where you'll be getting files.  Source configurations are stored as python dictionaries, so the format is important.  You are encouraged to use `settings-example.py` as a template for any new sources you add.  Sources must at a minimum have a name (all source names must be unique and may contain only letters, numbers, and a few special characters like dash and underscore) and a type (more on the types in the **MODULES** section below) as well as some configuration options based on the type.  
 
 By default sources get yesterday's files based on either the default date format or one specific to the source (defined by adding `'dateformat':'<string>'` to the source configuration).  You can include a different filter if you want in the source configuration using `'filter':'<string>'` where string is either plain text or a regular expression.  The date (or filter) can be overridden from the command line if needed (see **USAGE** section for more details).
 
 ### Destinations
-This is the section where you define where you'll be sending files after they are downloaded.  Destination configurations are stored as python dictionaries, so the format is important.  You are encouraged to use `settings-example.py` as a template for any new destinations you add.  Destinations must at a minimum have a name (all destination names must be unique) and a type (more on the types in the **MODULES** section below) as well as some configuration options based on the type.  
+This is the section where you define where you'll be sending files after they are downloaded.  Destination configurations are stored as python dictionaries, so the format is important.  You are encouraged to use `settings-example.py` as a template for any new destinations you add.  Destinations must at a minimum have a name (all destination names must be unique and may contain only letters, numbers, and a few special characters like dash and underscore) and a type (more on the types in the **MODULES** section below) as well as some configuration options based on the type.  
 
-Destinations can filter a file list returned by a source and also transform a file if needed.  You set filters for a given source by using `'filters':'<source>: <string>, <source2>: <string>'`.  Filters can be plain text or regular expressions.  If a filename includes the plain text or matches the regular expression, then it will be passed on for further proccessing.  
+Destinations can filter a file list returned by a source.  You set filters for a given source by using `'filters':'<source>: <string>, <source2>: <string>'`.  Filters can be plain text or regular expressions.  If a filename includes the plain text or matches the regular expression, then it will be passed on for further proccessing.  
 
-Destinations can also tranform a file before sending (see **MODULES** below for a list of available transforms).  You set transform modules for a given source by using `'transforms': '<source>: <module>, <source2>: <module2>'`.  Transforms can be chained together by using `<source>: <module>; <module2>; <module3>` (note the semi-colon for separating trasnform modules).  Tranforms will happen in the order listed.  Transforms can have configurations (based on the transform).  To configure a transform add `'<source>_<transform>_config': <config_dict>` where `<config_dict>` is a python dict (see `settings-example.py` for examples).  Note that the ACT transform in the Fireworks destination in `settings-example.py` actually converts the ACT fixed width to a CSV for Fireworks so you might want to keep that to use somewhere.  
+Destinations can also tranform files before sending (see **MODULES** below for a list of available transforms).  You set transform modules for a given source by using `'transforms': '<source>: <module>, <source2>: <module2>'`.  Transforms can be chained together by using `<source>: <module>; <module2>; <module3>` (note the semi-colon for separating transform modules).  Tranforms will happen in the order listed.  Transforms can have configurations (based on the transform).  To configure a transform add `'<source>_<transform>_config': <config_dict>` where `<config_dict>` is a python dict (see `settings-example.py` for examples).  Note that the ACT transform in the Fireworks destination in `settings-example.py` actually converts the ACT fixed width to a CSV for Fireworks so you might want to keep that to use somewhere.  
 
 By default any destination that places files (currently they all do) will place files in a subdirectory matching the name of the source.  This is to ensure that duplicate files names across sources don't cause an issue.  You can override this by putting `'sourcefolders': '<source1>: <path>, <source2>: <path2>'` in the configuration dictionary for the destination.  The path will be relative to the path you set for the destination and must be appropriate for the destination (e.g. if it's a sftp source you would use `this/is/the/path`).  If a given source doesn't have an override path then the default sourcefolder path will be used.  If you put all files from all sources in the same directory you are on your own to deal with duplicate file names.  **This script will overwrite existing files with the same names as names it's planning to use.  You have been warned.**
 
@@ -172,8 +172,8 @@ example: `'colspec': [(1,5), (6,22), (23,23)]` (this would break the file into t
 example: `'header': ['First Name', 'Last Name', 'Opt Out']`  
 `'encoding': '<string>'` (Defaults to Python discovery method.  Other options are listed at <https://docs.python.org/3.7/library/codecs.html#standard-encodings>)
 
-#### Transform Field (changefields)
-This module has a bunch of sub modules (described below) that allow you to do various things to a field of data (like do a regular expression search and replace, trim a pick list to one entry, and even drop the entire column).  The configuration for this transform is a bit tricky, so definitely look at the example in settings-example.py for some guidance.
+#### Transform Fields (changefields)
+This module has a bunch of sub modules (described below) that allow you to do various things to a field of data (like do a regular expression search and replace, trim a pick list to one entry, and even drop entire columns).  The configuration for this transform is a bit tricky, so definitely look at the example in settings-example.py for some guidance.
 
 * **Required Settings**  
 `'transforms': <list of dictionaries>` (see **FIELD TRANFORMS** below for details on dictionaries for specific field transforms)
@@ -191,14 +191,14 @@ You can use a field transform more than once in a row simply by adding another i
 This module drops the given column from the file completely.
 
 * **Required Settings**  
-`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'column': <integer>` (the column to be dropped - first column is column 0)  
 `'name': 'dropcolumn'`
 
 #### Replace Text (replace)
 This module does a search based on a regular expression then the corresponding replace with another regular expression.
 
 * **Required Setting**  
-`'column': <integer>` (the column where the choice list answers lives - first column is column 0)  
+`'column': <integer>` (the column where the text lives - first column is column 0)  
 `'name': 'replace'`  
 `'search': r'<regular expression>'` (the regular expression that will define the search criteria)  
 `'replace': r'<regular expression>'` (the regular expression that defines the replace)
@@ -207,7 +207,7 @@ This module does a search based on a regular expression then the corresponding r
 `'default': '<string>'` (If the field is empty, put this default value in the field instead)
 
 * **Notes**  
-If your `search` don't find anything, the entire original field will be returned.  
+If your `search` doesn't find anything, the entire original field will be returned.  
 By putting `r` in front of the string for the search and replace sections you don't have to escape slash characters.
 
 #### Trim Choice List (trimchoicelist)
