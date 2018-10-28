@@ -1,4 +1,4 @@
-def Transform( oldfield, transform, debug ):
+def Transform( oldfield, settings, debug ):
     loglines = []
     if debug:
         loglines.append( 'dropping column with data ' + oldfield )

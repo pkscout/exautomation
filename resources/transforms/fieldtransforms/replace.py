@@ -1,10 +1,10 @@
 import re
 
-def Transform( oldfield, transform, debug ):
+def Transform( oldfield, settings, debug ):
     loglines = []
-    search = transform.get( 'search', '' )
-    replace = transform.get( 'replace', '' )
-    default = transform.get( 'default', '' )
+    search = settings.get( 'search', '' )
+    replace = settings.get( 'replace', '' )
+    default = settings.get( 'default', '' )
     if oldfield:
         newfield = re.sub( search, replace, oldfield )
     else:
