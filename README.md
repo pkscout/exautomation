@@ -249,7 +249,7 @@ Start in: `"C:\CustomApps\exautomation\"`
 
 On most Unix variants, you'll use crontab.  The line you add to your crontab might look like:
 
-`15 05 * * * /usr/bin/python3 /home/automation/Scripts/exautomation/execute.py -s sat -f fireworks  > /dev/null 2>&1`
+`15 05 * * * /usr/bin/python3 /home/automation/Scripts/exautomation/execute.py -s SAT -f Fireworks  > /dev/null 2>&1`
 
 
 ## WRITING NEW MODULES:
