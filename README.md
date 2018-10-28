@@ -275,12 +275,17 @@ class Connection:
 
     def Download( self ):
         # whatever you're going to do to download files
-        return <list of files>, <list of log lines you'd like to add to the log>
+        # the list of filenames returned should be file names only with no paths
+        # any information you want to have logged should be in the loglines list (one line per list item)
+        return [list_of_filenames], [list_of_loglines]
 
 
     def Upload( self, files ):
         # whatever you're going to do to upload files
-        return <boolean indicating file outcome of upload>, <list of log lines you'd like to add to the log>
+        # because the upload is the last thing in the process, the boolean return value doesn't technically matter
+        # if True is returned the log will say the upload was successful (and note there were problems if False is returned)
+        # any information you want to have logged should be in the loglines list (one line per list item)
+        return (True or False), [list_of_loglines]
 ```
 
 Transform modules must have one public class named Transform with the following public functions:
@@ -289,19 +294,22 @@ Transform modules must have one public class named Transform with the following 
 class Transform:
     def Run( self, orgfile, destfile, settings, debug ):
         # whatever you're going to do to transform the file
-        # orgfile and destfile are full file paths and should not be changed
+        # orgfile and destfile are full file paths
+        # destfile generally shouldn't need to be changed unless the transform needs to change the filename for some reason
         # debug is True if debugging is set in settings, so this lets you return more detailed loglines if you wish
-        return destfile, <list of log lines you want to add to the log>
+        # any information you want to have logged should be in the loglines list (one line per list item)
+        return 'destfile_string', [list_of_loglines]
 ```
 
 Field Transform modules must have one public function as follows:
 
 ```python
-def Transform( oldfield, transform, debug ):
+def Transform( oldfield, settings, debug ):
     # whatever you're going to do to transform the field
-    # all settings for the tranform can be referenced using transform.get( 'name' )
+    # all settings for the tranform can be referenced using settings.get( 'name' )
     # debug is True if debugging is set in settings, so this lets you return more detailed loglines if you wish
-    return <string that is the transformed field>, <list of log lines you want to add to the log>
+    # any information you want to have logged should be in the loglines list (one line per list item)
+    return 'tranformed_field_string', [list_of_loglines]
 ```
 
 If you would like to submit your modules to the github repo as a pull request, I can add review and add them so others can use them too.  If you decide to do that, please provide an appropriate license that is compatible with the license under which this code is released.
