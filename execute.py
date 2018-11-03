@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.1.2.0
+# *  v.1.2.1
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, os, pathlib, random, re, sys, time
@@ -178,7 +178,11 @@ class Main:
                 if not success:
                     lw.log( ['error renaming %s to %s' % (destfile, orgfile)], 'info' )
                     return False
-                tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ), config.Get( 'debug' ) )
+                try:
+                    tfile, loglines = transform_modules[transform].Transform().Run( orgfile, destfile, destconfig.get( '%s_%s_config' % (self.ARGS.source, transform), {} ), config.Get( 'debug' ) )
+                except KeyError as e:
+                    lw.log( ['no transform module named %s found' % transform], 'info' )
+                    return False
                 lw.log( loglines, 'info' )
                 if tfile:
                     tpath = pathlib.PurePath( tfile )
