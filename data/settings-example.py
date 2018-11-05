@@ -66,6 +66,8 @@ destinations.append( { 'name': 'Fireworks',
                        'authtls': False,
                        'ssl': True,
                        'filters': 'SAT:.csv, CommonApp:.txt',
+                       'mergefiles': True,
+                       'hasheaders': {'ACT': False}
                        'transforms': 'Carnegie:changefields, SAT:changefields, CommonApp:filerename; changefields,  ACT:fixedtocsv',
                        'Carnegie_changefields_config': {'transforms': [
                                                           {'column':30, 'name':'dropcolumn'}
