@@ -1,6 +1,6 @@
 # *  Credits:
 # *
-# *  v.1.2.1
+# *  v.1.3.0
 # *  original exautomation code by Kyle Johnson
 
 import atexit, argparse, os, pathlib, random, re, sys, time
