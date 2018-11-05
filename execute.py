@@ -63,6 +63,9 @@ class Main:
             ffiles = self._filter_files( rfiles, destination[1].get( 'filters' ) )
             if not ffiles:
                 return            
+            if len( ffiles ) > 1 and destination[1].get( 'mergefiles', False ):
+                lw.log( ['attempting to merge files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
+                ffiles = self._merge_files( ffiles, destination[1].get( 'hasheaders', {} ).get( self.ARGS.source, True ) )
             lw.log( ['attempting to transform files from source %s for destination %s'  % (self.ARGS.source, destination[1].get( 'name', '' ))], 'info' )
             tfiles = self._transform_files( ffiles, destination[1] )
             if not tfiles:
@@ -125,6 +128,20 @@ class Main:
             self.DESTINATIONS.append( [connection_modules[settings['type']].Connection( config, settings ), settings] )
         return True
         
+
+    def _merge_files( self, files, hasheader):
+        main = files.pop( 0 )
+        dpath = os.path.join( self.DATAROOT, 'downloads' )
+        with open( os.path.join( dpath, main ), 'a' ) as outfile:
+            for file in files:
+                with open( os.path.join( dpath, file ), 'r' ) as infile:
+                    if hasheader:
+                        header, data = infile.read().split('\n', 1)
+                    else:
+                        data = infile.read()
+                    outfile.write( data )
+        return [main]
+
 
     def _parse_argv( self ):
         parser = argparse.ArgumentParser()
