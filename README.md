@@ -199,7 +199,7 @@ This module drops the given column from the file completely.
 #### Replace Text (replace)
 This module does a search based on a regular expression then the corresponding replace with another regular expression.
 
-* **Required Setting**  
+* **Required Settings**  
 `'column': <integer>` (the column where the text lives - first column is column 0)  
 `'name': 'replace'`  
 `'search': r'<regular expression>'` (the regular expression that will define the search criteria)  
@@ -211,6 +211,22 @@ This module does a search based on a regular expression then the corresponding r
 * **Notes**  
 If your `search` doesn't find anything, the entire original field will be returned.  
 By putting `r` in front of the string for the search and replace sections you don't have to escape slash characters.
+
+#### Score File Graduation Date to Entry Term (score-entryterm)
+This module allows you to transform the graduation date column from either the SAT or ACT into an entry term for your CRM.
+
+* **Required Settings**  
+`'column': <integer>` (the column where the graduation date or year lives - first column is column 0)  
+`'name': 'score-entryterm'`  
+`'scoretype': '<string>'` (either SAT or ACT)
+
+* **Optional Settings**  
+`'default_term': '<string>'` (the term to use if the graduation information is empty or too far in the past, defaults to `Unknown`)  
+`'entrytermformat': '<string>'` (the format of the entry term, can be any valid date format and defaults to `Fall %Y`)  
+`'breakmonth': <integer>` (the last month in which you accept students for a given fall term, defaults to `8` - i.e. August)
+
+* **Notes**  
+This transform uses some slightly convoluted logic to determine an entry term. For future years the graduation year becomes the entry term year if the graduation month is less than or equal to `breakmonth`, otherwise the entry term year becomes the year following graduation.  If the graduation year equals the current year and `breakmonth` has already passed the entry year is set to the following year, otherwise it's set to the current year.  If the graduation year equals the previous year, `breakmonth` hasn't passed yet, and the graduation month is after `breakmonth` then the entry term year is set to the current year.  Anything older than that gets the `default_term`.
 
 #### Trim Choice List (trimchoicelist)
 This module allows you to take a choice list field  (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.

@@ -1,5 +1,6 @@
 v.1.3.0
 - added option to merge files from a source for destinations that can only accept one file
+- added field transform to convert SAT and ACT graduation dates into entry term for CRMs
 
 v.1.2.1
 - added error checking and message if no transform module found with name given in settings
