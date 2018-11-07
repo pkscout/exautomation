@@ -15,7 +15,12 @@ def Transform( oldfield, settings, debug ):
         gradyear = int( fieldparts[0] )
         gradmonth = int( fieldparts[1] )
     elif scoretype.lower() == 'act':
-        gradyear = int( oldfield )
+        try:
+            gradyear = int( oldfield )
+        except ValueError:
+            if debug:
+                loglines.append( 'data in field cannot be converted to integer, returning original field' )
+            return oldfield, loglines
         gradmonth = 5
     else:
         if debug:
