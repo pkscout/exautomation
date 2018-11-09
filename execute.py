@@ -86,7 +86,7 @@ class Main:
         for file in files:
             if re.search( filter, file ):
                 ffiles.append( file )
-        if ffiles:
+        if not ffiles:
             lw.log( ['no files remaining to process after running filter ' + filter], 'info' )
         return ffiles
 
