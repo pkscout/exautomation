@@ -1,4 +1,6 @@
-v.1.3.2
+v.1.4.0
+- added fieldtransform to split ACTID and SSN into separate fields
+- updated changefields to allow a transform to return a list instead of a string and create additional columns as needed
 - fixed incorrect log line regarding files remaining after filtering
 
 v.1.3.1
