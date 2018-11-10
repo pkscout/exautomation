@@ -47,7 +47,11 @@ class Transform:
                             newfield, tloglines = field_modules[transform.get( 'name' )].Transform( oldfield, transform, debug )
                             loglines.extend( tloglines )
                             if not newfield is None:
-                                newrow.append( newfield )                          
+                                if not isinstance( newfield, list ):
+                                    newrow.append( newfield )
+                                else:
+                                    for anewfield in newfield:
+                                        newrow.append( anewfield )
                         else:
                             newrow.append( oldfield )
                     wtr.writerow( newrow )
