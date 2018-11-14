@@ -5,7 +5,8 @@ def Transform( oldfield, settings, debug ):
         if debug:
             loglines.append( 'no crosswalk provided, returning original field' )
         return oldfield, loglines
-    newfield = crosswalk.get( oldfield, oldfield )
+    default = settings.get( 'default', oldfield )
+    newfield = crosswalk.get( oldfield, default )
     if debug:
         loglines.extend( ['changed %s to %s using crosswalk map:' % (oldfield, newfield ), crosswalk] )
     return newfield, loglines
