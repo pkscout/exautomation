@@ -189,6 +189,20 @@ You can use a field transform more than once in a row simply by adding another i
 
 ### Field Transform Modules
 
+#### Crosswalk (crosswalk)
+This module takes a crosswalk dictionary and returns an updated value based on that dictionary.
+
+* **Required Settings**  
+`'column': <integer>` (the column where the text lives - first column is column 0)  
+`'name': 'crosswalk'`  
+`'crosswalk': <crosswalk dictionary>`  
+
+* **Optional Settings**  
+`'default': '<string>'` (if the crosswalk provides no match and this is included and, then `<string>` will be returned, without it original field will be returned)
+
+* **Notes**  
+You add crosswalk dictionaries to the `crosswalkmaps.py` file in your data folder.  To start, copy `crosswalkmaps-example.py` to `crosswalkmaps.py`.  The variable `crosswalks` is a dictionary of dictionaries in the format `'crosswalkname':{'cwitem1':'cwconversion1', 'cwitem1':'cwconversion1'}`.  The examples file has some "standard" crosswalks included like 2 letter US state to full state name, single character binary gender to full gender description, etc.  The best way to get the specific dictionary you need in the `'crosswalk'` setting above is to use `crosswalks.get( 'crosswalkname' )`. Getting it this way will be handled gracefully if the `crosswalkname` doesn't exist in the crosswalks dictionary.  You can use `crosswalks['crosswalkname']` as well, but if you do that and `crosswalkname` doesn't exist the script will halt with an IndexError that will not be logged.
+
 #### Drop Column (dropcolumn)
 This module drops the given column from the file completely.
 
