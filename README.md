@@ -341,7 +341,12 @@ def Transform( oldfield, settings, debug ):
     # all settings for the tranform can be referenced using settings.get( 'name' )
     # debug is True if debugging is set in settings, so this lets you return more detailed loglines if you wish
     # any information you want to have logged should be in the loglines list (one line per list item)
-    return 'tranformed_field_string', [list_of_loglines]
+    # if you have a field transform that needs to access other columns in the same row, you can access
+    # an entire row of data by using settings.get( 'fullrow' )
+    # if you need to add a new column, you can return a list instead of a string, but be aware that your field transform
+    # needs to do something different with the header row the module will have to figure out whether the header row is being
+    # sent based solely on the oldfield or fullrow
+    return <tranformed_field_string or list>, [list_of_loglines]
 ```
 
 If you would like to submit your modules to the github repo as a pull request, I can add review and add them so others can use them too.  If you decide to do that, please provide an appropriate license that is compatible with the license under which this code is released.
