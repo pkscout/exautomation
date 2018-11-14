@@ -1,3 +1,7 @@
+v.1.5.0
+- added fieldtransform to do crosswalks
+- fix for ACT header to match weird, undocumented Fireworks restrictions
+
 v.1.4.0
 - added fieldtransform to split ACTID and SSN into separate fields
 - updated changefields to allow a transform to return a list instead of a string and create additional columns as needed
