@@ -11,5 +11,5 @@ def Transform( oldfield, settings, debug ):
             loglines.append( 'field starts with a number, so it must be a SSN' )        
         return [oldfield, ''], loglines
     if debug:
-        loglines.append( 'field is does not seem to be empty, a SSN, or an ACT ID, so it must be the header row' )
+        loglines.append( 'field does not seem to be empty, a SSN, or an ACT ID, so it must be the header row' )
     return ['SSN', 'ACT ID'], loglines
