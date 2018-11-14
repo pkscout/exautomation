@@ -44,6 +44,7 @@ class Transform:
                                 if check_transform.get( 'column' ) == i:
                                     transform = check_transform
                                     break
+                            transform['fullrow'] = row
                             newfield, tloglines = field_modules[transform.get( 'name' )].Transform( oldfield, transform, debug )
                             loglines.extend( tloglines )
                             if not newfield is None:
