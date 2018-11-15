@@ -1,5 +1,5 @@
 import os, re
-from resources.common.fileops import checkPath, copyFile, osPathFromString
+from resources.common.fileops import checkPath, copyFile, deleteFile, osPathFromString
 from resources.common.remotesites import parseSettings
 
 class Connection:
@@ -9,6 +9,7 @@ class Connection:
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
         self.REMOTEPATH = osPathFromString( settings.get( 'path' ) )
+        self.DELETEAFTERDOWNLOAD = settings.get( 'deleteafterdownload' )
     
     
     def Download( self ):
@@ -28,6 +29,9 @@ class Connection:
                 loglines.extend( cloglines )
                 if success:
                     dlist.append( file )
+                    if self.DELETEAFTERDOWNLOAD:
+                        success, dloglines = deleteFile( srcpath )
+                        loglines.extend( dloglines )
         return dlist, loglines
         
 

@@ -1,3 +1,6 @@
+v.1.5.1
+- experimental option to delete file from source after download
+
 v.1.5.0
 - added fieldtransform to do crosswalks
 - fix for ACT header to match weird, undocumented Fireworks restrictions

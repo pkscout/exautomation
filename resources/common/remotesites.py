@@ -158,6 +158,12 @@ class SFTP:
                     if success == True:
                         loglines.append( 'downloaded %s to %s' % (remotefile, localfile) )
                         dlist.append( filename )
+                        if self.SETTINGS.get( 'deleteafterdownload' ):
+                            success = sftp.RemoveFile( remotefile )
+                            if success:
+                                loglines.append( 'deleted file %s from sftp site' % filename )
+                            else:
+                                loglines.extend( ['unable to delete file', sftp.lastErrorText()] ) 
                     else:
                         loglines.append( 'unable to download %s to %s' % (remotefile, localfile) )
                         if self.SETTINGS.get( 'debug' ):
@@ -251,6 +257,12 @@ class FTPS:
                     if success == True:
                         loglines.append( 'downloaded %s to %s' % (filename, localfile) )
                         dlist.append( filename )
+                        if self.SETTINGS.get( 'deleteafterdownload' ):
+                            success = ftps.DeleteRemoteFile( filename )
+                            if success:
+                                loglines.append( 'deleted file %s from ftps site' % filename )
+                            else:
+                                loglines.extend( ['unable to delete file', ftps.lastErrorText()] ) 
                     else:
                         loglines.append( 'unable to download %s to %s' % (filename, localfile) )
                         if self.SETTINGS.get( 'debug' ):
@@ -331,6 +343,12 @@ class SMB:
                         loglines.extend( ['error reading file', str( e )] )
                 if success:
                     dlist.append( file.filename )
+                    if self.SETTINGS.get( 'deleteafterdownload' ):
+                        try:
+                            loglines.append( 'deleteing file %s from %s' % (srcpath, share) )
+                            conn.deleteFiles( share, srcpath )
+                        except smb.smb_structs.OperationFailure as e:
+                            loglines.extend( ['error deleting file', str( e )] )    
         return dlist, loglines
                                      
 

@@ -18,6 +18,7 @@ class Connection:
         self.CONNECTCONFIG['auth'] = settings.get( 'auth' )
         self.CONNECTCONFIG['port'] = settings.get( 'port', 22 )
         self.CONNECTCONFIG['timeout'] = settings.get( 'timeout', 15000 )
+        self.CONNECTCONFIG['deleteafterdownload'] = settings.get( 'deleteafterdownload' )
     
     
     def Download( self ):

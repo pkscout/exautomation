@@ -7,23 +7,24 @@ class Connection:
         self.REMOTEFILTER = defaults.get( 'remotefilter' )
         self.SOURCEFOLDER = defaults.get( 'sourcefolder' )
         self.REMOTEPATH = settings.get( 'path', '' )
-        self.CONFIG = {}
-        self.CONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
-        self.CONFIG['host'] = settings.get( 'host' )
-        self.CONFIG['port'] = settings.get( 'port', 990 )
-        self.CONFIG['username'] = settings.get( 'user' )
-        self.CONFIG['auth'] = settings.get( 'auth' )
-        self.CONFIG['passive'] = settings.get( 'passive', False )
-        self.CONFIG['authtls'] = settings.get( 'authtls', True )
-        self.CONFIG['ssl'] = settings.get( 'ssl', False )
-        self.CONFIG['debug'] = config.Get( 'debug' )
+        self.CONNECTCONFIG = {}
+        self.CONNECTCONFIG['chilkat_license'] = config.Get( 'chilkat_license' )
+        self.CONNECTCONFIG['host'] = settings.get( 'host' )
+        self.CONNECTCONFIG['port'] = settings.get( 'port', 990 )
+        self.CONNECTCONFIG['username'] = settings.get( 'user' )
+        self.CONNECTCONFIG['auth'] = settings.get( 'auth' )
+        self.CONNECTCONFIG['passive'] = settings.get( 'passive', False )
+        self.CONNECTCONFIG['authtls'] = settings.get( 'authtls', True )
+        self.CONNECTCONFIG['ssl'] = settings.get( 'ssl', False )
+        self.CONNECTCONFIG['debug'] = config.Get( 'debug' )
+        self.CONNECTCONFIG['deleteafterdownload'] = settings.get( 'deleteafterdownload' )
 
 
     def Download( self ):
-        ftps = FTPS( self.CONFIG )
+        ftps = FTPS( self.CONNECTCONFIG )
         return ftps.Download( destination=self.LOCALDOWNLOADPATH, filter=self.REMOTEFILTER, path=self.REMOTEPATH  )
 
 
     def Upload( self, files ):
-        ftps = FTPS( self.CONFIG )
+        ftps = FTPS( self.CONNECTCONFIG )
         return ftps.Upload( files=files, origin=self.LOCALDOWNLOADPATH, path='/'.join( [self.REMOTEPATH, self.SOURCEFOLDER] ) )

@@ -19,6 +19,7 @@ class Connection:
         self.CONNECTCONFIG['domainname'] = settings.get( 'domainname', '' )
         self.CONNECTCONFIG['usentlmv2'] = settings.get( 'usentlmv2', True )
         self.CONNECTCONFIG['isdirectip'] = settings.get( 'usedirectip', True )
+        self.CONNECTCONFIG['deleteafterdownload'] = settings.get( 'deleteafterdownload' )
     
     
     def Download( self ):
