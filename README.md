@@ -138,7 +138,7 @@ The directory path needs to be noted in POSIX format (i.e. `this/is/the/path`) a
 * **Required Settings**  
 `'user': '<string>'` (account used to login)  
 `'auth': '<string>'` (password for login)  
-`'dateformat': '%Y-%m-%dT00:00:00-<UTCOFFSET>'`  
+`'dateformat': '%Y-%m-%dT00:00:00<UTCOFFSET>'`  
 
 * **Notes**  
 This connection module uses the College Board API to retrieve files.  The remaining connection information is in `config.py`.  You can technically override those configs by adding the items from `config.py` to `settings.py`, but if any of those change the module will likely have to be updated anyway, as it means something major changed.  
