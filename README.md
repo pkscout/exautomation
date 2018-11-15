@@ -248,6 +248,13 @@ This module allows you to transform the graduation date column from either the S
 * **Notes**  
 This transform uses some slightly convoluted logic to determine an entry term. For future years the graduation year becomes the entry term year if the graduation month is less than or equal to `breakmonth`, otherwise the entry term year becomes the year following graduation.  If the graduation year equals the current year and `breakmonth` has already passed the entry year is set to the following year, otherwise it's set to the current year.  If the graduation year equals the previous year, `breakmonth` hasn't passed yet, and the graduation month is after `breakmonth` then the entry term year is set to the current year.  Anything older than that gets the `default_term`.
 
+#### Split ACT ID and SSN (actssnsplit)
+This module allows you to split the ACT ID and SSN into two different field (ACT uses the same field for both values).
+
+* **Required Settings**  
+`'column': <integer>` (the column where the graduation date or year lives - first column is column 0)  
+`'name': 'actssnsplit'`  
+
 #### Trim Choice List (trimchoicelist)
 This module allows you to take a choice list field  (i.e. a list of things separated by a delimiter) and keep only one of them (either the first one or based on a priority list).  This is useful if one of your sources has a question that allows multiple answers to a question but your destination only allows one answer.
 
