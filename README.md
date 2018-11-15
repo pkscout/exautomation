@@ -78,7 +78,8 @@ There are three types of modules: connection modules, transform modules, and fie
 `'path':'<string>'` (path to the directory where the files are, defaults to the root directory)  
 `'port': <integer>` (sftp port, defaults to 22)  
 `'key_auth': '<string>'` (if using an encrypted private key, the passphrase to decrypt it)  
-`'timeout': <integer>` (time before connection attempt aborts in milliseconds, defaults to 15000)
+`'timeout': <integer>` (time before connection attempt aborts in milliseconds, defaults to 15000)  
+`'deleteafterdownload': <boolean>` (if set to `True` any files downloaded will be deleted from the source)
 
 * **Notes**  
 If you want to use a private key, it needs to go in the data/keys folder named as `<sourcename>_private.key` (this is case senstive, so if sourcename has capital letters, the file name needs them too).  
@@ -96,7 +97,8 @@ During the first connection to a SFTP server, the script will save the hostkey p
 `'timeout': <integer>` (time before connection attempt aborts in milliseconds, defaults to 15000)  
 `'authtls': <boolean>` (whether to use authtls to secure connection, default `True`)  
 `'ssl': <boolean>` (whether to use ssl to secure connection, default `False`)  
-`'passive': <boolean>` (whether to use passive mode, default `False`)
+`'passive': <boolean>` (whether to use passive mode, default `False`)  
+`'deleteafterdownload': <boolean>` (if set to `True` any files downloaded will be deleted from the source)
 
 * **Notes**  
 The authtls and ssl settings are mutually exclusive.  If you set both to `True`, authtls will be used.  
@@ -105,6 +107,9 @@ You can technically use this module for an unsecured FTP connection by setting b
 #### Local File (localfile)
 * **Required Settings**  
 `'path': '<string>'` (path to the directory where the files are)  
+
+* **Optional Settings**  
+`'deleteafterdownload': <boolean>` (if set to `True` any files downloaded will be deleted from the source)
 
 * **Notes**  
 The directory path needs to be noted in POSIX format (i.e. `/this/is/the/path`) and start at the root directory for the file system.  For Windows include the drive letter as the first directory (i.e. `/C:/this/is/the/path`).
@@ -124,6 +129,7 @@ You should be able to use this to access any file on any mounted drive (even if 
 `'domainname': '<string>'` (the name of the domain to which the server belongs)  
 `'usentlmv2': <boolean>` (whether or not to use NTLM v2, default `True`)  
 `'isdirectip': <boolean>` (whether to use Direct Hosting over TCP or NetBIOS, default `True`)  
+`'deleteafterdownload': <boolean>` (if set to `True` any files downloaded will be deleted from the source)
 
 * **Notes**  
 The directory path needs to be noted in POSIX format (i.e. `this/is/the/path`) and references the path on the share to which you will be connecting.  Note that you **SHOULD NOT** include a forward slash at the beginning.
