@@ -104,7 +104,7 @@ class SFTP:
             loglines.append( 'WARNING: HOSTKEY FOR %s SERVER DOES NOT MATCH SAVED KEY. ABORTING.' % self.SETTINGS.get( 'module_name', '' ).upper() )
             return False, loglines
         if key:
-            loglines.append( 'trying to authentication using private key' )
+            loglines.append( 'trying to authenticate using private key' )
             success = sftp.AuthenticatePk( self.SETTINGS.get( 'username', '' ), key )
         else:
             success = False
@@ -113,7 +113,7 @@ class SFTP:
                 loglines.append( sftp.lastErrorText() )
             elif key:
                 loglines.append( 'private key based authentication failed' )
-            loglines.append( 'trying to authentication with username and password' )
+            loglines.append( 'trying to authenticate with username and password' )
             success = sftp.AuthenticatePw( self.SETTINGS.get( 'username', '' ), self.SETTINGS.get( 'auth', '' ) )
             if not success:
                 loglines.append( sftp.lastErrorText() )
@@ -172,7 +172,7 @@ class SFTP:
         if not success and self.SETTINGS.get( 'debug' ):
             loglines.append( sftp.lastErrorText() )
         if not dlist:
-            loglines.append( ['no files matching filter ' + filter] )
+            loglines.append( 'no files matching filter ' + filter )
         return dlist, loglines
 
 
